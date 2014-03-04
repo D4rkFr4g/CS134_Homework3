@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" width="180" height="15" tilewidth="32" tileheight="32">
+ <tileset firstgid="1" name="astroTileset" tilewidth="32" tileheight="32">
+  <image source="astroTileset.png" width="512" height="448"/>
+ </tileset>
+ <layer name="Tile Layer 1" width="180" height="15">
+  <data encoding="base64" compression="zlib">
+   eJzt2EFOwkAUBuAnNZGAbkxaZdWiosACuYaE06Ar1gRdeQ09gy5ED6Acyb/pNJm0jWVsG4byL76k06btm+bNn0k9ETkgqgnPghqIysJ+pjphP1OdhP3cgBacQhuO4cSC2ohMxf0cj8/gHDpbrusTviz4PrRbLuASDuEKenANN+qc7giaFdfjqHd9wEod92EAw4yaiHSBAVeq32+b1EOUNN7QK3QlynN9PRTJbEfS6+vFoCYq7tmCGsqcy6a950vU/9/wA2s1LpLZWc/z//ksIhO3kl4PWZkd5vVI3ZOVv3lZPLVgrrSf4sx+g3d17GrXgxzMYrJJMrMXMNGu38nf+x1mMRFRtWZwDw8wT1jCIzxJ9f+uiX4B8wlXug==
+  </data>
+ </layer>
+</map>

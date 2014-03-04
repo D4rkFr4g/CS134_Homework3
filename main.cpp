@@ -28,11 +28,13 @@ float color[] = {0,0,0};
 float currentDirection = 1;
 int g_windowWidth = 640;
 int g_windowHeight = 480;
-int g_windowMaxWidth = g_windowWidth * 2;
-int g_windowMaxHeight = g_windowHeight * 2;
+int g_windowMaxWidth = 0;
+int g_windowMaxHeight = 0;
 Camera g_cam;
 int camDelta = 20;
-TileLevel *level0;
+const int g_numOfLevels = 1;
+int g_currentLevel = 0;
+TileLevel level[g_numOfLevels];
 int spriteSize = 64;
 int spriteReserve = 50000;
 int g_spriteArraySize;
@@ -48,8 +50,6 @@ bool shouldExit = false;
 
 static void init2D()
 {
-	g_cam = Camera(g_windowWidth, g_windowHeight, 0, g_windowMaxWidth, 0, g_windowMaxHeight);
-
 	// OpenGL calls
 	glViewport(0,0,(GLsizei) g_windowWidth, (GLsizei) g_windowHeight);
 	glMatrixMode(GL_PROJECTION);
@@ -58,6 +58,17 @@ static void init2D()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_COLOR);  //Ghost Chickens
+}
+
+static void initCamera()
+{
+	//g_cam = Camera(g_windowWidth, g_windowHeight, 0, g_windowMaxWidth, 0, g_windowMaxHeight);
+	TileLevel currentLevel = level[g_currentLevel];
+
+	g_windowMaxWidth = (currentLevel.width * currentLevel.tilesWidth) - g_windowWidth;
+	g_windowMaxHeight = (currentLevel.height * currentLevel.tilesHeight) - g_windowHeight;
+
+	g_cam = Camera(0, 0, 0, g_windowMaxWidth, 0, g_windowMaxHeight);
 }
 
 static void loadSprites()
@@ -170,8 +181,8 @@ static void drawSprites()
 
 static void loadLevel()
 {
-	level0 = new TileLevel();
-	tileLoader::loadTiles("./Levels/level0.txt", level0);
+	level[g_currentLevel] = TileLevel();
+	tileLoader::loadTiles("./Levels/level1.txt", level);
 }
 
 using namespace std;
@@ -220,6 +231,8 @@ int main( void )
 	init2D();
 	loadSprites();
 	loadLevel();
+	initCamera();
+
 	SDL_TimerID spriteTimer = SDL_AddTimer(33, updateSprites, (void *) "spriteTimer Callback");
 	SDL_TimerID AITimer = SDL_AddTimer(2000, chickenAI, (void *) "chickenAI Callback");
 	int last_time = 0;
@@ -255,7 +268,7 @@ int main( void )
 		
 		// All calls to glDrawSprite go here
 		clearBackground();
-		level0->drawLevel(g_cam.x, g_cam.y);
+		level[g_currentLevel].drawLevel(g_cam.x, g_cam.y);
 		drawSprites();
 
 		SDL_GL_SwapWindow( window );
