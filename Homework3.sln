@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Homework3", "Homework2.vcxproj", "{6375A6C5-4348-2C52-3B4D-C5F57F514F91}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6375A6C5-4348-2C52-3B4D-C5F57F514F91}.Debug|Win32.ActiveCfg = Debug|Win32
+		{6375A6C5-4348-2C52-3B4D-C5F57F514F91}.Debug|Win32.Build.0 = Debug|Win32
+		{6375A6C5-4348-2C52-3B4D-C5F57F514F91}.Release|Win32.ActiveCfg = Release|Win32
+		{6375A6C5-4348-2C52-3B4D-C5F57F514F91}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
