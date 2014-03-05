@@ -2,43 +2,29 @@
 
 Sprite::Sprite(void)
 {
+	initialize(0, 0, 0, 0, 0, 0, 0, 1, 1);
 }
 
 Sprite::Sprite(GLuint texture, int width, int height)
 {
-	this->texture = texture;
-	this->width = width;
-	this->height = height;
-	x = 0;
-	y = 0;
-	this->tu = 0;
-	this->tv = 0;
-	this->tSizeX = 1;
-	this->tSizeY = 1;
-	posX = 0;
-	posY = 0;
-	this->isFlippedX = false;
-	this->isFlippedY = false;
+	initialize(texture, 0, 0, width, height, 0, 0, 1, 1);
 }
 
 Sprite::Sprite(GLuint texture, int x, int y, int width, int height)
 {
-	this->texture = texture;
-	this->width = width;
-	this->height = height;
-	this->x = x;
-	this->y = y;
-	this->tu = 0;
-	this->tv = 0;
-	this->tSizeX = 1;
-	this->tSizeY = 1;
-	posX = (float)x;
-	posY = (float)y;
-	this->isFlippedX = false;
-	this->isFlippedY = false;
+	initialize(texture, x, y, width, height, 0, 0, 1, 1);
 }
 
 Sprite::Sprite(GLuint texture, int x, int y, int width, int height, GLfloat tu, GLfloat tv, GLfloat tSizeX, GLfloat tSizeY)
+{
+	initialize(texture, x, y, width, height, tu, tv, tSizeX, tSizeY);
+}
+
+Sprite::~Sprite(void)
+{
+}
+
+void Sprite::initialize(GLuint texture, int x, int y, int width, int height, GLfloat tu, GLfloat tv, GLfloat tSizeX, GLfloat tSizeY)
 {
 	this->texture = texture;
 	this->width = width;
@@ -53,10 +39,6 @@ Sprite::Sprite(GLuint texture, int x, int y, int width, int height, GLfloat tu, 
 	posY = (float)y;
 	this->isFlippedX = false;
 	this->isFlippedY = false;
-}
-
-Sprite::~Sprite(void)
-{
 }
 
 void Sprite::draw(void)

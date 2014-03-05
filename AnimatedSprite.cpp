@@ -8,8 +8,9 @@ AnimatedSprite::AnimatedSprite(void) : Sprite()
 AnimatedSprite::AnimatedSprite(GLuint texture, int x, int y, int width, int height, GLfloat tu, GLfloat tv, GLfloat tSizeX, GLfloat tSizeY)
 	: Sprite(texture, x, y, width, height, tu, tv, tSizeX, tSizeY)
 {
-	walkingAnimation = AnimationData();
-	idleAnimation = AnimationData();
+	//walkingAnimation = AnimationData();
+	//idleAnimation = AnimationData();
+	this->curAnimation = AnimationData();
 	this->isAnimated = true;
 }
 
@@ -41,12 +42,7 @@ void AnimatedSprite::update(int ms)
 	}
 }
 
-void AnimatedSprite::walking()
+void AnimatedSprite::setAnimation(std::string animation)
 {
-	curAnimation = walkingAnimation;
-}
-
-void AnimatedSprite::idle()
-{
-	curAnimation = idleAnimation;
+	curAnimation = animations[animation];
 }
