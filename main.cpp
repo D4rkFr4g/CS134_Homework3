@@ -32,6 +32,7 @@ const int spriteReserve = 50000;
 const int initialChickens = 20;
 const int chickenSpeed = 50;
 const unsigned char* kbState = NULL;
+const int g_numOfCheckBuckets = 9;
 
 // Global Variables
 SDL_Window* g_window;
@@ -43,8 +44,9 @@ int g_windowMaxWidth = 0;
 int g_windowMaxHeight = 0;
 Camera g_cam;
 int g_currentLevel = 0;
-TileLevel level[g_numOfLevels];
-std::vector<AnimatedSprite> spriteList;
+TileLevel g_level[g_numOfLevels];
+std::vector<std::vector<AnimatedSprite>> g_spriteBuckets;
+int* g_checkBuckets;
 GLuint spriteTexture;
 int diff_time;
 unsigned char kbPrevState[SDL_NUM_SCANCODES] = {0};
@@ -53,149 +55,6 @@ bool shouldExit = false;
 
 using namespace std;
 
-/*-----------------------------------------------*/
-static void init2D()
-{
-	// OpenGL calls
-	glViewport(0,0,(GLsizei) g_windowWidth, (GLsizei) g_windowHeight);
-	glMatrixMode(GL_PROJECTION);
-	glOrtho(0, g_windowWidth, g_windowHeight, 0, 0, 1);
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_COLOR);  //Ghost Chickens
-}
-/*-----------------------------------------------*/
-static void initCamera()
-{
-	//g_cam = Camera(g_windowWidth, g_windowHeight, 0, g_windowMaxWidth, 0, g_windowMaxHeight);
-	TileLevel currentLevel = level[g_currentLevel];
-
-	g_windowMaxWidth = (currentLevel.width * currentLevel.tilesWidth) - g_windowWidth;
-	g_windowMaxHeight = (currentLevel.height * currentLevel.tilesHeight) - g_windowHeight;
-
-	g_cam = Camera(0, 0, 0, g_windowMaxWidth, 0, g_windowMaxHeight);
-	g_cam.updateResolution(g_windowWidth, g_windowHeight);
-}
-/*-----------------------------------------------*/
-static void loadSprites()
-{
-	spriteList.reserve(spriteReserve);
-	spriteTexture = glTexImageTGAFile("./Sprites/spriteSheet_chicken.tga", NULL, NULL);
-	
-	// Load the Initial chickens
-	for (int i = 0; i < initialChickens; i++)
-		makeChicken();
-}
-/*-----------------------------------------------*/
-static void makeChicken()
-{
-	int x = rand() % ((g_windowWidth * 3) - spriteSize);
-	int y = rand() % ((g_windowHeight *3) - spriteSize);
-
-	AnimatedSprite sprite_chicken = AnimatedSprite(spriteTexture, x, y, spriteSize, spriteSize, 0, 0, 0.5, 1); 
-
-	// Walking Animation
-	int numFrames = 2;
-	int timeToNextFrame = 100;
-	AnimationFrame* frames_walking = new AnimationFrame[numFrames];
-	frames_walking[0] = AnimationFrame(0,0,0.5,1);
-	frames_walking[1] = AnimationFrame(0.5,0,0.5,1);
-	Animation animation_walking = Animation("Walking", frames_walking, numFrames);
-	sprite_chicken.animations[animation_walking.name] = AnimationData(animation_walking, timeToNextFrame);
-
-	// Idle Animation
-	numFrames = 1;
-	AnimationFrame* frames_idle = new AnimationFrame[numFrames];
-	frames_idle[0] = AnimationFrame(0,0,0.5,1);
-	Animation animation_idle = Animation("Idle", frames_idle, numFrames);
-	sprite_chicken.animations[animation_idle.name] = AnimationData(animation_idle, timeToNextFrame);
-	sprite_chicken.setAnimation("Walking");
-	
-	// Set Chicken direction
-	sprite_chicken.setSpeed(getSpeed(), getSpeed());
-
-	// Set direction
-	if (sprite_chicken.speedX < 0)
-		sprite_chicken.isFlippedX = true;
-	else if (sprite_chicken.speedX > 0)
-		sprite_chicken.isFlippedX = false;
-
-	spriteList.push_back(sprite_chicken);
-}
-/*-----------------------------------------------*/
-Uint32 updateSprites(Uint32 interval, void *param)
-{
-	for (int i = 0; i < (int) spriteList.size(); i++)
-	{
-		spriteList[i].update(diff_time);
-	}
-
-	return interval;
-}
-/*-----------------------------------------------*/
-Uint32 chickenAI(Uint32 interval, void *param)
-{
-	for (int i = 0; i < (int) spriteList.size(); i++)
-	{
-		AnimatedSprite* chicken = &spriteList[i];
-		int speedX = chicken->speedX;
-		int speedY = chicken->speedY;
-
-		// If stopped Restart Chicken
-		if (speedX == 0 && speedY == 0)
-		{
-			speedX = getSpeed();
-			speedY = getSpeed();
-			chicken->setAnimation("Walking");
-
-			// Set direction
-			if (speedX < 0)
-				chicken->isFlippedX = true;
-			else if (speedX > 0)
-				chicken->isFlippedX = false;
-		}
-		else
-		{
-			// Randomly stop chickens
-			int willStop = rand() % 2;
-			if (willStop)
-			{
-				speedX = 0;
-				speedY = 0;
-				chicken->setAnimation("Idle");
-			}
-		}
-
-		chicken->setSpeed(speedX, speedY);
-	}
-
-	return interval;
-}
-/*-----------------------------------------------*/
-static int getSpeed()
-{
-	int speed = rand() % 2;
-	int negation = rand() % 2;
-	if (negation)
-		speed *= -1;
-	return speed * chickenSpeed;
-}
-/*-----------------------------------------------*/
-static void drawSprites()
-{
-	for (int i = 0; i < (int) spriteList.size(); i++)
-	{
-		if (g_cam.collider.AABBIntersect(&spriteList[i].collider))
-			spriteList[i].drawUV(g_cam.x, g_cam.y);
-	}
-}
-/*-----------------------------------------------*/
-static void loadLevel()
-{
-	level[g_currentLevel] = TileLevel();
-	tileLoader::loadTiles("./Levels/level1.txt", level);
-}
 /*-----------------------------------------------*/
 static int initSDL()
 {
@@ -238,6 +97,226 @@ static int initSDL()
 	return 0;
 }
 /*-----------------------------------------------*/
+static void init2D()
+{
+	// OpenGL calls
+	glViewport(0,0,(GLsizei) g_windowWidth, (GLsizei) g_windowHeight);
+	glMatrixMode(GL_PROJECTION);
+	glOrtho(0, g_windowWidth, g_windowHeight, 0, 0, 1);
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_COLOR);  //Ghost Chickens
+}
+/*-----------------------------------------------*/
+static void initCamera()
+{
+	//g_cam = Camera(g_windowWidth, g_windowHeight, 0, g_windowMaxWidth, 0, g_windowMaxHeight);
+	TileLevel currentLevel = g_level[g_currentLevel];
+
+	g_windowMaxWidth = (currentLevel.width * currentLevel.tilesWidth) - g_windowWidth;
+	g_windowMaxHeight = (currentLevel.height * currentLevel.tilesHeight) - g_windowHeight;
+
+	g_cam = Camera(0, 0, 0, g_windowMaxWidth, 0, g_windowMaxHeight);
+	g_cam.updateResolution(g_windowWidth, g_windowHeight);
+}
+/*-----------------------------------------------*/
+static int whichBucket(int x, int y)
+{
+	int column = (int) floor((float) x / g_windowWidth);
+	int row = (int) floor((float) y / g_windowHeight);
+	int bucketWidth = (int) floor((float) g_windowMaxWidth / g_windowWidth);
+
+	if (column < 0 || column >= bucketWidth)
+		return -1;
+
+	return (row * bucketWidth) + column;
+}
+/*-----------------------------------------------*/
+static void updateCheckBuckets()
+{
+	g_checkBuckets[0] = whichBucket(g_cam.x - g_windowWidth, g_cam.y + g_windowHeight);
+	g_checkBuckets[1] = whichBucket(g_cam.x, g_cam.y + g_windowHeight);
+	g_checkBuckets[2] = whichBucket(g_cam.x + g_windowWidth, g_cam.y + g_windowHeight);
+	g_checkBuckets[3] = whichBucket(g_cam.x - g_windowWidth, g_cam.y);
+	g_checkBuckets[4] = whichBucket(g_cam.x, g_cam.y);
+	g_checkBuckets[5] = whichBucket(g_cam.x + g_windowWidth, g_cam.y);
+	g_checkBuckets[6] = whichBucket(g_cam.x - g_windowWidth, g_cam.y - g_windowHeight);
+	g_checkBuckets[7] = whichBucket(g_cam.x, g_cam.y - g_windowHeight);
+	g_checkBuckets[8] = whichBucket(g_cam.x + g_windowWidth, g_cam.y - g_windowHeight);
+}
+/*-----------------------------------------------*/
+static void initBuckets()
+{
+	g_checkBuckets = new int [g_numOfCheckBuckets];
+
+	// Initialize spriteBuckets
+	int bucketWidth = (int) floor((float) g_windowMaxWidth / g_windowWidth);
+	int bucketHeight = (int) floor((float) g_windowMaxHeight / g_windowHeight) + 1;
+	int numOfBuckets = bucketWidth * bucketHeight;
+	g_spriteBuckets.reserve(numOfBuckets);
+	
+	for (int i = 0; i < numOfBuckets; i++)
+	{
+		vector<AnimatedSprite> temp;
+		g_spriteBuckets.push_back(temp);
+	}
+}
+/*-----------------------------------------------*/
+static void loadSprites()
+{
+	spriteTexture = glTexImageTGAFile("./Sprites/spriteSheet_chicken.tga", NULL, NULL);
+	
+	// Load the Initial chickens
+	for (int i = 0; i < initialChickens; i++)
+		makeChicken();
+}
+/*-----------------------------------------------*/
+static void makeChicken()
+{
+	int x = rand() % (g_windowMaxWidth - spriteSize);
+	int y = rand() % (g_windowMaxHeight - spriteSize);
+
+	AnimatedSprite sprite_chicken = AnimatedSprite(spriteTexture, x, y, spriteSize, spriteSize, 0, 0, 0.5, 1); 
+
+	// Walking Animation
+	int numFrames = 2;
+	int timeToNextFrame = 100;
+	AnimationFrame* frames_walking = new AnimationFrame[numFrames];
+	frames_walking[0] = AnimationFrame(0,0,0.5,1);
+	frames_walking[1] = AnimationFrame(0.5,0,0.5,1);
+	Animation animation_walking = Animation("Walking", frames_walking, numFrames);
+	sprite_chicken.animations[animation_walking.name] = AnimationData(animation_walking, timeToNextFrame);
+
+	// Idle Animation
+	numFrames = 1;
+	AnimationFrame* frames_idle = new AnimationFrame[numFrames];
+	frames_idle[0] = AnimationFrame(0,0,0.5,1);
+	Animation animation_idle = Animation("Idle", frames_idle, numFrames);
+	sprite_chicken.animations[animation_idle.name] = AnimationData(animation_idle, timeToNextFrame);
+	sprite_chicken.setAnimation("Walking");
+	
+	// Set Chicken direction
+	sprite_chicken.setSpeed(getSpeed(), getSpeed());
+
+	// Set direction
+	if (sprite_chicken.speedX < 0)
+		sprite_chicken.isFlippedX = true;
+	else if (sprite_chicken.speedX > 0)
+		sprite_chicken.isFlippedX = false;
+
+	// Load sprite into bucket
+	x = sprite_chicken.x;
+	y = sprite_chicken.y;
+	g_spriteBuckets[whichBucket(x, y)].push_back(sprite_chicken);
+}
+/*-----------------------------------------------*/
+Uint32 chickenAI(Uint32 interval, void *param)
+{
+	updateCheckBuckets();
+	int numOfBuckets = g_spriteBuckets.size();
+
+	for (int i = 0; i < g_numOfCheckBuckets; i++)
+	{
+		if (g_checkBuckets[i] >= 0 && g_checkBuckets[i] < numOfBuckets)
+		{
+			int bucket = g_checkBuckets[i];
+			for (int j = 0; j < (int) g_spriteBuckets[bucket].size(); j++)
+			{
+				AnimatedSprite* chicken = &g_spriteBuckets[bucket][j];
+				int speedX = chicken->speedX;
+				int speedY = chicken->speedY;
+
+				// If stopped Restart Chicken
+				if (speedX == 0 && speedY == 0)
+				{
+					speedX = getSpeed();
+					speedY = getSpeed();
+					chicken->setAnimation("Walking");
+
+					// Set direction
+					if (speedX < 0)
+						chicken->isFlippedX = true;
+					else if (speedX > 0)
+						chicken->isFlippedX = false;
+				}
+				else
+				{
+					// Randomly stop chickens
+					int willStop = rand() % 2;
+					if (willStop)
+					{
+						speedX = 0;
+						speedY = 0;
+						chicken->setAnimation("Idle");
+					}
+				}
+
+				chicken->setSpeed(speedX, speedY);
+			}
+		}
+	}
+
+	return interval;
+}
+/*-----------------------------------------------*/
+Uint32 updateSprites(Uint32 interval, void *param)
+{
+	updateCheckBuckets();
+
+	int numOfBuckets = g_spriteBuckets.size();
+	
+	for (int i = 0; i < g_numOfCheckBuckets; i++)
+	{
+		if (g_checkBuckets[i] >= 0 && g_checkBuckets[i] < numOfBuckets)
+		{
+			int bucket = g_checkBuckets[i];
+			for (int j = 0; j < (int) g_spriteBuckets[bucket].size(); j++)
+			{
+				g_spriteBuckets[bucket][j].update(diff_time);
+			}
+		}
+	}
+
+	return interval;
+}
+/*-----------------------------------------------*/
+static void drawSprites()
+{
+	updateCheckBuckets();
+
+	int numOfBuckets = g_spriteBuckets.size();
+	
+	for (int i = 0; i < g_numOfCheckBuckets; i++)
+	{
+		if (g_checkBuckets[i] >= 0 && g_checkBuckets[i] < numOfBuckets)
+		{
+			int bucket = g_checkBuckets[i];
+			for (int j = 0; j < (int) g_spriteBuckets[bucket].size(); j++)
+			{
+				// Only draw if sprite is on screen
+				if (g_cam.collider.AABBIntersect(&g_spriteBuckets[bucket][j].collider))
+					g_spriteBuckets[bucket][j].drawUV(g_cam.x, g_cam.y);
+			}
+		}
+	}
+}
+/*-----------------------------------------------*/
+static int getSpeed()
+{
+	int speed = rand() % 2;
+	int negation = rand() % 2;
+	if (negation)
+		speed *= -1;
+	return speed * chickenSpeed;
+}
+/*-----------------------------------------------*/
+static void loadLevel()
+{
+	g_level[g_currentLevel] = TileLevel();
+	tileLoader::loadTiles("./Levels/level1.txt", g_level);
+}
+/*-----------------------------------------------*/
 static void clearBackground()
 {
 	float r,g,b;
@@ -276,10 +355,12 @@ static void keyboard()
 	}
 else if (kbState[SDL_SCANCODE_MINUS] || kbState[SDL_SCANCODE_KP_MINUS])
 	{
-		if (spriteList.size() > 0)
-		{
-			spriteList.pop_back();
-		}
+		// Remove a random chicken
+		int numOfBuckets = g_spriteBuckets.size();
+		int choice = rand() % numOfBuckets;
+
+		if (g_spriteBuckets[choice].size() > 0)
+			g_spriteBuckets[choice].pop_back();
 	}
 }
 /*-----------------------------------------------*/
@@ -292,9 +373,10 @@ int main( void )
 		return 1;
 
 	init2D();
-	loadSprites();
 	loadLevel();
 	initCamera();
+	initBuckets();
+	loadSprites();
 
 	SDL_TimerID spriteTimer = SDL_AddTimer(33, updateSprites, (void *) "spriteTimer Callback");
 	SDL_TimerID AITimer = SDL_AddTimer(2000, chickenAI, (void *) "chickenAI Callback");
@@ -331,7 +413,7 @@ int main( void )
 		
 		// All calls to glDrawSprite go here
 		clearBackground();
-		level[g_currentLevel].drawLevel(g_cam.x, g_cam.y);
+		g_level[g_currentLevel].drawLevel(g_cam.x, g_cam.y, g_windowWidth, g_windowHeight);
 		drawSprites();
 
 		SDL_GL_SwapWindow( g_window );

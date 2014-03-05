@@ -9,7 +9,7 @@ public:
 	TileLevel(int width, int height, int tileWidth, int tileHeight);
 	~TileLevel(void);
 
-	void drawLevel(int camX, int camY);
+	void drawLevel(int camX, int camY, int screenWidth, int screenHeight);
 
 	// Global Variables
 	int tilesWidth, tilesHeight;
