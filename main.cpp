@@ -8,7 +8,6 @@
 #include <vector>
 #include <string>
 #include <time.h>
-#include <map>
 #include "DrawUtils.h"
 #include "Sprite.h"
 #include "AnimatedSprite.h"
@@ -18,23 +17,13 @@
 
 using namespace std;
 
-// Forward Declarations
 static void keyboard();
 static void clearBackground();
 static void makeChicken();
 static int getSpeed();
 
-// Constants
-const int camDelta = 20;
-const int g_numOfLevels = 1;
-const int spriteSize = 64;
-const int spriteReserve = 50000;
-const int initialChickens = 20;
-const int chickenSpeed = 50;
-const unsigned char* kbState = NULL;
-
-// Global Variables
-SDL_Window* g_window;
+enum {R, G, B};
+int currentColor = R;
 float color[] = {0,0,0};
 float currentDirection = 1;
 int g_windowWidth = 640;
@@ -42,18 +31,23 @@ int g_windowHeight = 480;
 int g_windowMaxWidth = 0;
 int g_windowMaxHeight = 0;
 Camera g_cam;
+int camDelta = 20;
+const int g_numOfLevels = 1;
 int g_currentLevel = 0;
 TileLevel level[g_numOfLevels];
+int spriteSize = 64;
+int spriteReserve = 50000;
+int g_spriteArraySize;
 std::vector<AnimatedSprite> spriteList;
 GLuint spriteTexture;
 int diff_time;
+int initialChickens = 20;
+int chickenSpeed = 50;
+
 unsigned char kbPrevState[SDL_NUM_SCANCODES] = {0};
+const unsigned char* kbState = NULL;
 bool shouldExit = false;
-// End Variables
 
-using namespace std;
-
-/*-----------------------------------------------*/
 static void init2D()
 {
 	// OpenGL calls
@@ -65,7 +59,7 @@ static void init2D()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_COLOR);  //Ghost Chickens
 }
-/*-----------------------------------------------*/
+
 static void initCamera()
 {
 	//g_cam = Camera(g_windowWidth, g_windowHeight, 0, g_windowMaxWidth, 0, g_windowMaxHeight);
@@ -76,7 +70,7 @@ static void initCamera()
 
 	g_cam = Camera(0, 0, 0, g_windowMaxWidth, 0, g_windowMaxHeight);
 }
-/*-----------------------------------------------*/
+
 static void loadSprites()
 {
 	spriteList.reserve(spriteReserve);
@@ -86,30 +80,28 @@ static void loadSprites()
 	for (int i = 0; i < initialChickens; i++)
 		makeChicken();
 }
-/*-----------------------------------------------*/
+
 static void makeChicken()
 {
 	int x = rand() % ((g_windowWidth * 3) - spriteSize);
 	int y = rand() % ((g_windowHeight *3) - spriteSize);
 
-	AnimatedSprite sprite_chicken = AnimatedSprite(spriteTexture, x, y, spriteSize, spriteSize, 0, 0, 0.5, 1); 
-
+	AnimatedSprite sprite_chicken = AnimatedSprite(spriteTexture, x, y, spriteSize, spriteSize, 0, 0, 0.5, 1);
 	// Walking Animation
 	int numFrames = 2;
-	int timeToNextFrame = 100;
+	int timeToNextFrame = 150;
 	AnimationFrame* frames_walking = new AnimationFrame[numFrames];
 	frames_walking[0] = AnimationFrame(0,0,0.5,1);
 	frames_walking[1] = AnimationFrame(0.5,0,0.5,1);
 	Animation animation_walking = Animation("Walking", frames_walking, numFrames);
-	sprite_chicken.animations[animation_walking.name] = AnimationData(animation_walking, timeToNextFrame);
-
+	sprite_chicken.walkingAnimation = AnimationData(animation_walking, timeToNextFrame);
 	// Idle Animation
 	numFrames = 1;
 	AnimationFrame* frames_idle = new AnimationFrame[numFrames];
 	frames_idle[0] = AnimationFrame(0,0,0.5,1);
 	Animation animation_idle = Animation("Idle", frames_idle, numFrames);
-	sprite_chicken.animations[animation_idle.name] = AnimationData(animation_idle, timeToNextFrame);
-	sprite_chicken.setAnimation("Walking");
+	sprite_chicken.idleAnimation = AnimationData(animation_idle, timeToNextFrame);
+	sprite_chicken.walking();
 	
 	// Set Chicken direction
 	sprite_chicken.setSpeed(getSpeed(), getSpeed());
@@ -122,7 +114,7 @@ static void makeChicken()
 
 	spriteList.push_back(sprite_chicken);
 }
-/*-----------------------------------------------*/
+
 Uint32 updateSprites(Uint32 interval, void *param)
 {
 	for (int i = 0; i < (int) spriteList.size(); i++)
@@ -132,7 +124,7 @@ Uint32 updateSprites(Uint32 interval, void *param)
 
 	return interval;
 }
-/*-----------------------------------------------*/
+
 Uint32 chickenAI(Uint32 interval, void *param)
 {
 	for (int i = 0; i < (int) spriteList.size(); i++)
@@ -146,7 +138,7 @@ Uint32 chickenAI(Uint32 interval, void *param)
 		{
 			speedX = getSpeed();
 			speedY = getSpeed();
-			chicken->setAnimation("Walking");
+			chicken->walking();
 
 			// Set direction
 			if (speedX < 0)
@@ -162,7 +154,7 @@ Uint32 chickenAI(Uint32 interval, void *param)
 			{
 				speedX = 0;
 				speedY = 0;
-				chicken->setAnimation("Idle");
+				chicken->idle();
 			}
 		}
 
@@ -171,7 +163,7 @@ Uint32 chickenAI(Uint32 interval, void *param)
 
 	return interval;
 }
-/*-----------------------------------------------*/
+
 static int getSpeed()
 {
 	int speed = rand() % 2;
@@ -180,21 +172,24 @@ static int getSpeed()
 		speed *= -1;
 	return speed * chickenSpeed;
 }
-/*-----------------------------------------------*/
+
 static void drawSprites()
 {
 	for (int i = 0; i < (int) spriteList.size(); i++)	
 		spriteList[i].drawUV(g_cam.x, g_cam.y);
 }
-/*-----------------------------------------------*/
+
 static void loadLevel()
 {
 	level[g_currentLevel] = TileLevel();
 	tileLoader::loadTiles("./Levels/level1.txt", level);
 }
-/*-----------------------------------------------*/
-static int initSDL()
-{
+
+using namespace std;
+int main( void )
+{	
+	srand(time(NULL));
+
 	// Initialize SDL
 	if( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0 ) 
 	{
@@ -204,19 +199,20 @@ static int initSDL()
 	// Create the window, OpenGL context
 	SDL_GL_SetAttribute( SDL_GL_BUFFER_SIZE, 32 );
 	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-	g_window = SDL_CreateWindow(
+	SDL_Window* window = SDL_CreateWindow(
 	"Invincible Chickens",
 	SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 	g_windowHeight, g_windowHeight,
-	SDL_WINDOW_OPENGL);// | SDL_WINDOW_FULLSCREEN );
+	SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN );
 	glCullFace( GL_BACK );
 
-	if( !g_window ) 
+
+	if( !window ) 
 	{
 		SDL_Quit();
 		return 1;
 	}
-	SDL_GL_CreateContext( g_window );
+	SDL_GL_CreateContext( window );
 
 	// Make sure we have a recent version of OpenGL
 	GLenum glewError = glewInit();
@@ -230,63 +226,8 @@ static int initSDL()
 		SDL_Quit();
 		return 1;
 	}
-	
-	return 0;
-}
-/*-----------------------------------------------*/
-static void clearBackground()
-{
-	float r,g,b;
-	r = 0;
-	g = 0;
-	b = 0;
-	glClearColor(r,g,b,1);
-	glClear(GL_COLOR_BUFFER_BIT);
-}
-/*-----------------------------------------------*/
-static void keyboard()
-{
-	if (kbState[ SDL_SCANCODE_LEFT ])
-	{
-		g_cam.updateX(-camDelta);
-	}
-	else if (kbState[ SDL_SCANCODE_RIGHT ])
-	{
-		g_cam.updateX(camDelta);
-	}
-	else if (kbState[ SDL_SCANCODE_UP ])
-	{
-		g_cam.updateY(-camDelta);
-	}
-	else if (kbState[ SDL_SCANCODE_DOWN ])
-	{
-		g_cam.updateY(camDelta);
-	}
-	else if (kbState[ SDL_SCANCODE_ESCAPE ])
-	{
-		shouldExit = true;
-	}
-	else if (kbState[ SDL_SCANCODE_EQUALS] | kbState[ SDL_SCANCODE_KP_PLUS ])
-	{
-		makeChicken();
-	}
-else if (kbState[SDL_SCANCODE_MINUS] || kbState[SDL_SCANCODE_KP_MINUS])
-	{
-		if (spriteList.size() > 0)
-		{
-			spriteList.pop_back();
-		}
-	}
-}
-/*-----------------------------------------------*/
-int main( void )
-{	
-	srand((unsigned int) time(NULL));
 
 	// Setup calls
-	if (initSDL())
-		return 1;
-
 	init2D();
 	loadSprites();
 	loadLevel();
@@ -330,9 +271,54 @@ int main( void )
 		level[g_currentLevel].drawLevel(g_cam.x, g_cam.y);
 		drawSprites();
 
-		SDL_GL_SwapWindow( g_window );
+		SDL_GL_SwapWindow( window );
 	}
 
 	SDL_Quit();
 	return 0;
+}
+
+static void clearBackground()
+{
+	float r,g,b;
+	r = 0;
+	g = 0;
+	b = 0;
+	glClearColor(r,g,b,1);
+	glClear(GL_COLOR_BUFFER_BIT);
+}
+
+static void keyboard()
+{
+	if (kbState[ SDL_SCANCODE_LEFT ])
+	{
+		g_cam.updateX(-camDelta);
+	}
+	else if (kbState[ SDL_SCANCODE_RIGHT ])
+	{
+		g_cam.updateX(camDelta);
+	}
+	else if (kbState[ SDL_SCANCODE_UP ])
+	{
+		g_cam.updateY(-camDelta);
+	}
+	else if (kbState[ SDL_SCANCODE_DOWN ])
+	{
+		g_cam.updateY(camDelta);
+	}
+	else if (kbState[ SDL_SCANCODE_ESCAPE ])
+	{
+		shouldExit = true;
+	}
+	else if (kbState[ SDL_SCANCODE_EQUALS] | kbState[ SDL_SCANCODE_KP_PLUS ])
+	{
+		makeChicken();
+	}
+else if (kbState[SDL_SCANCODE_MINUS] || kbState[SDL_SCANCODE_KP_MINUS])
+	{
+		if (spriteList.size() > 0)
+		{
+			spriteList.pop_back();
+		}
+	}
 }

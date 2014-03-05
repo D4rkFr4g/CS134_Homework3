@@ -4,7 +4,7 @@ class AABB
 public:
 	// Constructors
 	AABB(void);
-	AABB(int x, int y, int w, int h);
+	AABB::AABB(int x, int y, int w, int h);
 	~AABB(void);
 
 	// Functions

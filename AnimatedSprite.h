@@ -1,5 +1,4 @@
 #pragma once
-#include <map>
 #include "sprite.h"
 #include "AnimationData.h"
 
@@ -14,11 +13,13 @@ public:
 	
 	// Functions
 	void update(int ms);
-	void setAnimation(std::string animation);
+	void walking();
+	void idle();
 
 	// Variables
 	bool isAnimated;
 	AnimationData curAnimation;
-	std::map<std::string, AnimationData> animations;
+	AnimationData walkingAnimation;
+	AnimationData idleAnimation;
 };
 
