@@ -39,6 +39,7 @@ void Sprite::initialize(GLuint texture, int x, int y, int width, int height, GLf
 	posY = (float)y;
 	this->isFlippedX = false;
 	this->isFlippedY = false;
+	collider = AABB(x, y, width, height);
 }
 
 void Sprite::draw(void)

@@ -40,6 +40,10 @@ void AnimatedSprite::update(int ms)
 		tSizeX = frame.tWidth;
 		tSizeY = frame.tHeight;
 	}
+
+	// Update Collider
+	collider.x = x;
+	collider.y = y;
 }
 
 void AnimatedSprite::setAnimation(std::string animation)

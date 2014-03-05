@@ -25,7 +25,7 @@ static void makeChicken();
 static int getSpeed();
 
 // Constants
-const int camDelta = 20;
+const int camSpeed = 10;
 const int g_numOfLevels = 1;
 const int spriteSize = 64;
 const int spriteReserve = 50000;
@@ -75,6 +75,7 @@ static void initCamera()
 	g_windowMaxHeight = (currentLevel.height * currentLevel.tilesHeight) - g_windowHeight;
 
 	g_cam = Camera(0, 0, 0, g_windowMaxWidth, 0, g_windowMaxHeight);
+	g_cam.updateResolution(g_windowWidth, g_windowHeight);
 }
 /*-----------------------------------------------*/
 static void loadSprites()
@@ -183,8 +184,11 @@ static int getSpeed()
 /*-----------------------------------------------*/
 static void drawSprites()
 {
-	for (int i = 0; i < (int) spriteList.size(); i++)	
-		spriteList[i].drawUV(g_cam.x, g_cam.y);
+	for (int i = 0; i < (int) spriteList.size(); i++)
+	{
+		if (g_cam.collider.AABBIntersect(&spriteList[i].collider))
+			spriteList[i].drawUV(g_cam.x, g_cam.y);
+	}
 }
 /*-----------------------------------------------*/
 static void loadLevel()
@@ -248,19 +252,19 @@ static void keyboard()
 {
 	if (kbState[ SDL_SCANCODE_LEFT ])
 	{
-		g_cam.updateX(-camDelta);
+		g_cam.updateX(-camSpeed);
 	}
 	else if (kbState[ SDL_SCANCODE_RIGHT ])
 	{
-		g_cam.updateX(camDelta);
+		g_cam.updateX(camSpeed);
 	}
 	else if (kbState[ SDL_SCANCODE_UP ])
 	{
-		g_cam.updateY(-camDelta);
+		g_cam.updateY(-camSpeed);
 	}
 	else if (kbState[ SDL_SCANCODE_DOWN ])
 	{
-		g_cam.updateY(camDelta);
+		g_cam.updateY(camSpeed);
 	}
 	else if (kbState[ SDL_SCANCODE_ESCAPE ])
 	{

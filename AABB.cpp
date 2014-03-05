@@ -22,19 +22,19 @@ AABB::~AABB(void)
 {
 }
 
-bool AABBIntersect(const AABB* box1, const AABB* box2)
+bool AABB::AABBIntersect(AABB* box)
 {
-	// box1 to the right
-	if( box1->x > box2->x + box2->w ) 
+	// This box to the right
+	if( this->x > box->x + box->w ) 
 		return false;
-	// box1 to the left
-	if( box1->x + box1->w < box2->x )
+	// This box to the left
+	if( this->x + this->w < box->x )
 		return false;
-	// box1 below
-	if( box1->y > box2->y + box2->h )
+	// This box below
+	if( this->y > box->y + box->h )
 		return false;
-	// box1 above
-	if( box1->y + box1->h < box2->y )
+	// This box above
+	if( this->y + this->h < box->y )
 		return false;
 	
 	return true;

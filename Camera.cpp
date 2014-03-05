@@ -4,8 +4,22 @@
 Camera::Camera(void)
 {
 }
-
+/*-----------------------------------------------*/
 Camera::Camera(int x, int y, int minX, int maxX, int minY, int maxY)
+{
+	initialize(x, y, minX, maxX, minY, maxY);
+}
+/*-----------------------------------------------*/
+Camera::Camera(int x, int y)
+{
+	initialize(x, y, 0, sizeof(int), 0, sizeof(int));
+}
+/*-----------------------------------------------*/
+Camera::~Camera(void)
+{
+}
+/*-----------------------------------------------*/
+void Camera::initialize(int x, int y, int minX, int maxX, int minY, int maxY)
 {
 	this->x = x;
 	this->y = y;
@@ -13,22 +27,20 @@ Camera::Camera(int x, int y, int minX, int maxX, int minY, int maxY)
 	this->maxX = maxX;
 	this->minY = minY;
 	this->maxY = maxY;
+	collider.x = x;// - overrage;
+	collider.y = y;// - overrage;
+	overrage = 5;
 }
-
-Camera::Camera(int x, int y)
+/*-----------------------------------------------*/
+void Camera::updateResolution(int width, int height)
 {
-	this->x = x;
-	this->y = y;
-	this->minX = 0;
-	this->maxX = sizeof(int);
-	this->minY = 0;
-	this->maxY = sizeof(int);
-}
+	this->width = width;
+	this->height = height;
 
-Camera::~Camera(void)
-{
+	collider.w = width;// + overrage;
+	collider.h = height;// + overrage;
 }
-
+/*-----------------------------------------------*/
 void Camera::updateX(int value)
 {
 	x = x + value;
@@ -37,8 +49,10 @@ void Camera::updateX(int value)
 		x = minX;
 	else if (x > maxX)
 		x = maxX;
-}
 
+	collider.x = x;// - ovverage;
+}
+/*-----------------------------------------------*/
 void Camera::updateY(int value)
 {
 	y = y + value;
@@ -47,4 +61,7 @@ void Camera::updateY(int value)
 		y = minY;
 	else if (y > maxY)
 		y = maxY;
+
+	collider.y = y;// - overrage;
 }
+/*-----------------------------------------------*/

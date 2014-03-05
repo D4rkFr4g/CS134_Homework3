@@ -8,7 +8,7 @@ public:
 	~AABB(void);
 
 	// Functions
-	bool AABBIntersect(const AABB* box1, const AABB* box2);
+	bool AABBIntersect(AABB* box);
 
 	// Variables
 	int x, y, w, h;
