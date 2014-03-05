@@ -1,15 +1,16 @@
 #pragma once
+#include <string>
 #include "AnimationFrame.h"
 
 class Animation
 {
 public:
 	Animation(void);
-	Animation(char* name, AnimationFrame* frames, int numFrames);
+	Animation(std::string name, AnimationFrame* frames, int numFrames);
 	~Animation(void);
 
 	// Variables
-	const char* name;
+	std::string name;
 	AnimationFrame* frames;
 	int numFrames;
 };
