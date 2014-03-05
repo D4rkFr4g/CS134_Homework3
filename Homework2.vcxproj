@@ -24,7 +24,8 @@
     <ClCompile Include="tileLoader.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Levels\level0.txt" />
+    <None Include="glew32.dll" />
+    <None Include="glew32mx.dll" />
     <None Include="SDL2.dll" />
     <None Include="Sprites\spriteSheet_chicken.tga" />
     <None Include="Sprites\sprite_chicken.tga" />
