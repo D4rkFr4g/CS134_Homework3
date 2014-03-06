@@ -181,7 +181,7 @@ static void makeChicken()
 
 	// Walking Animation
 	int numFrames = 2;
-	int timeToNextFrame = 100;
+	int timeToNextFrame = 150;
 	AnimationFrame* frames_walking = new AnimationFrame[numFrames];
 	frames_walking[0] = AnimationFrame(0,0,0.5,1);
 	frames_walking[1] = AnimationFrame(0.5,0,0.5,1);
@@ -287,6 +287,9 @@ Uint32 updateSprites(Uint32 interval, void *param)
 					j--;
 					bucketSize--;
 				}
+				g_spriteBuckets[bucket][j].update(diff_time);
+
+				//TODO update/move chicken in a bucket
 			}
 		}
 	}
