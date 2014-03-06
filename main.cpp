@@ -114,10 +114,10 @@ static void initCamera()
 	//g_cam = Camera(g_windowWidth, g_windowHeight, 0, g_windowMaxWidth, 0, g_windowMaxHeight);
 	TileLevel currentLevel = g_level[g_currentLevel];
 
-	g_windowMaxWidth = (currentLevel.width * currentLevel.tilesWidth) - g_windowWidth;
-	g_windowMaxHeight = (currentLevel.height * currentLevel.tilesHeight) - g_windowHeight;
+	g_windowMaxWidth = (currentLevel.width * currentLevel.tilesWidth);
+	g_windowMaxHeight = (currentLevel.height * currentLevel.tilesHeight);
 
-	g_cam = Camera(0, 0, 0, g_windowMaxWidth, 0, g_windowMaxHeight);
+	g_cam = Camera(0, 0, 0, g_windowMaxWidth - g_windowWidth, 0, g_windowMaxHeight - g_windowHeight);
 	g_cam.updateResolution(g_windowWidth, g_windowHeight);
 }
 /*-----------------------------------------------*/
@@ -152,7 +152,7 @@ static void initBuckets()
 
 	// Initialize spriteBuckets
 	int bucketWidth = (int) floor((float) g_windowMaxWidth / g_windowWidth);
-	int bucketHeight = (int) floor((float) g_windowMaxHeight / g_windowHeight) + 1;
+	int bucketHeight = (int) floor((float) g_windowMaxHeight / g_windowHeight);
 	int numOfBuckets = bucketWidth * bucketHeight;
 	g_spriteBuckets.reserve(numOfBuckets);
 	
@@ -274,6 +274,8 @@ Uint32 updateSprites(Uint32 interval, void *param)
 			for (int j = 0; j < (int) g_spriteBuckets[bucket].size(); j++)
 			{
 				g_spriteBuckets[bucket][j].update(diff_time);
+
+				//TODO update/move chicken in a bucket
 			}
 		}
 	}
