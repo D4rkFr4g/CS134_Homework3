@@ -151,7 +151,7 @@ static void initBuckets()
 	g_checkBuckets = new int [g_numOfCheckBuckets];
 
 	// Initialize spriteBuckets
-	int bucketWidth = (int) floor((float) g_windowMaxWidth / g_windowWidth);
+	int bucketWidth = (int) floor((float) g_windowMaxWidth / g_windowWidth) + 1;
 	int bucketHeight = (int) floor((float) g_windowMaxHeight / g_windowHeight) + 1;
 	int numOfBuckets = bucketWidth * bucketHeight;
 	g_spriteBuckets.reserve(numOfBuckets);
@@ -271,9 +271,22 @@ Uint32 updateSprites(Uint32 interval, void *param)
 		if (g_checkBuckets[i] >= 0 && g_checkBuckets[i] < numOfBuckets)
 		{
 			int bucket = g_checkBuckets[i];
-			for (int j = 0; j < (int) g_spriteBuckets[bucket].size(); j++)
+			int spriteBucketSize = g_spriteBuckets.size();
+			int bucketSize = g_spriteBuckets[bucket].size();
+			for (int j = 0; j < bucketSize; j++)
 			{
-				g_spriteBuckets[bucket][j].update(diff_time);
+				AnimatedSprite* sprite = &g_spriteBuckets[bucket][j];
+				sprite->update(diff_time);
+
+				// Rebucket if necessary
+				int newBucket = whichBucket(sprite->x, sprite->y);
+				if (newBucket >= 0 && newBucket < spriteBucketSize && newBucket != bucket)
+				{
+					g_spriteBuckets[newBucket].push_back(*sprite);
+					g_spriteBuckets[bucket].erase(g_spriteBuckets[bucket].begin() + j);
+					j--;
+					bucketSize--;
+				}
 			}
 		}
 	}
