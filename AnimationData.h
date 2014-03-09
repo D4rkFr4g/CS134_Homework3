@@ -4,7 +4,7 @@ class AnimationData
 {
 public:
 	AnimationData(void);
-	AnimationData(Animation def, int timeToNextFrame);
+	AnimationData(Animation def, int timeToNextFrame, bool isRepeating);
 	~AnimationData(void);
 
 	// Functions
@@ -17,5 +17,6 @@ public:
 	int currentFrame;
 	int timeToNextFrame;
 	int elapsedTime;
+	bool isRepeating;
 };
 

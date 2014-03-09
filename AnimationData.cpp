@@ -5,12 +5,13 @@ AnimationData::AnimationData(void)
 {
 }
 
-AnimationData::AnimationData(Animation def, int timeToNextFrame)
+AnimationData::AnimationData(Animation def, int timeToNextFrame, bool isRepeating)
 {
 	this->def = def;
 	this->timeToNextFrame = timeToNextFrame;
 	this->elapsedTime = 0;
 	this->currentFrame = 0;
+	this->isRepeating = isRepeating;
 }
 
 AnimationData::~AnimationData(void)
@@ -37,5 +38,10 @@ void AnimationData::advanceFrame()
 {
 	currentFrame++;
 	if (currentFrame >= def.numFrames)
-		currentFrame = 0;
+	{
+		if (isRepeating)
+			currentFrame = 0;
+		else
+			currentFrame = def.numFrames - 1;
+	}
 }

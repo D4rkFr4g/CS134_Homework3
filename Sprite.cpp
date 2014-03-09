@@ -40,6 +40,8 @@ void Sprite::initialize(GLuint texture, int x, int y, int width, int height, GLf
 	this->isFlippedX = false;
 	this->isFlippedY = false;
 	collider = AABB(x, y, width, height);
+	speedX = 0;
+	speedY = 0;
 }
 
 void Sprite::draw(void)
@@ -54,12 +56,23 @@ void Sprite::draw(int camX, int camY)
 
 void Sprite::drawUV(int camX, int camY)
 {
-	if (isFlippedX && tSizeX > 0 || !isFlippedX && tSizeX < 0)
-		tSizeX *= -1;
-	if (isFlippedY && tSizeY > 0 || !isFlippedY && tSizeY < 0)
-		tSizeY *= -1;
+	GLfloat u = tu;
+	GLfloat v = tv;
+	GLfloat uSize = tSizeX;
+	GLfloat vSize = tSizeY;
 
-	glDrawSprite(texture, x - camX, y - camY, width, height, tu, tv, tSizeX, tSizeY);
+	if (isFlippedX)
+	{
+		u += uSize;
+		uSize *= -1;
+	}
+	if (isFlippedY)
+	{
+		v += vSize;
+		vSize *= -1;
+	}
+
+	glDrawSprite(texture, x - camX, y - camY, width, height, u, v, uSize, vSize);
 }
 
 void Sprite::update(int ms)

@@ -12,9 +12,11 @@
 #include "DrawUtils.h"
 #include "Sprite.h"
 #include "AnimatedSprite.h"
+#include "PlayerSprite.h"
 #include "Camera.h"
 #include "TileLevel.h"
 #include "tileLoader.h"
+#include "player.h"
 
 using namespace std;
 
@@ -48,9 +50,11 @@ TileLevel g_level[g_numOfLevels];
 std::vector<std::vector<AnimatedSprite>> g_spriteBuckets;
 int* g_checkBuckets;
 GLuint spriteTexture;
+GLuint playerTexture;
 int diff_time;
 unsigned char kbPrevState[SDL_NUM_SCANCODES] = {0};
 bool shouldExit = false;
+PlayerSprite g_player;
 // End Variables
 
 using namespace std;
@@ -166,10 +170,15 @@ static void initBuckets()
 static void loadSprites()
 {
 	spriteTexture = glTexImageTGAFile("./Sprites/spriteSheet_chicken.tga", NULL, NULL);
-	
+	int* width = new int;
+	int* height = new int;
+	playerTexture = glTexImageTGAFile("./Sprites/contra_sheet.tga", width, height);
+
 	// Load the Initial chickens
 	for (int i = 0; i < initialChickens; i++)
 		makeChicken();
+
+	g_player = player::makePlayer(playerTexture, *width, *height);
 }
 /*-----------------------------------------------*/
 static void makeChicken()
@@ -186,14 +195,14 @@ static void makeChicken()
 	frames_walking[0] = AnimationFrame(0,0,0.5,1);
 	frames_walking[1] = AnimationFrame(0.5,0,0.5,1);
 	Animation animation_walking = Animation("Walking", frames_walking, numFrames);
-	sprite_chicken.animations[animation_walking.name] = AnimationData(animation_walking, timeToNextFrame);
+	sprite_chicken.animations[animation_walking.name] = AnimationData(animation_walking, timeToNextFrame, true);
 
 	// Idle Animation
 	numFrames = 1;
 	AnimationFrame* frames_idle = new AnimationFrame[numFrames];
 	frames_idle[0] = AnimationFrame(0,0,0.5,1);
 	Animation animation_idle = Animation("Idle", frames_idle, numFrames);
-	sprite_chicken.animations[animation_idle.name] = AnimationData(animation_idle, timeToNextFrame);
+	sprite_chicken.animations[animation_idle.name] = AnimationData(animation_idle, timeToNextFrame, true);
 	sprite_chicken.setAnimation("Walking");
 	
 	// Set Chicken direction
@@ -287,12 +296,16 @@ Uint32 updateSprites(Uint32 interval, void *param)
 					j--;
 					bucketSize--;
 				}
-				g_spriteBuckets[bucket][j].update(diff_time);
+				if (j >= 0)
+					g_spriteBuckets[bucket][j].update(diff_time);
 
 				//TODO update/move chicken in a bucket
 			}
 		}
 	}
+
+	// Update player
+	g_player.update(diff_time);
 
 	return interval;
 }
@@ -316,6 +329,8 @@ static void drawSprites()
 			}
 		}
 	}
+
+	g_player.drawUV(g_cam.x, g_cam.y);
 }
 /*-----------------------------------------------*/
 static int getSpeed()
@@ -345,6 +360,8 @@ static void clearBackground()
 /*-----------------------------------------------*/
 static void keyboard()
 {
+	player::playerKeyboard(&g_player, kbState, kbPrevState);
+
 	if (kbState[ SDL_SCANCODE_LEFT ])
 	{
 		g_cam.updateX(-camSpeed);
@@ -365,11 +382,11 @@ static void keyboard()
 	{
 		shouldExit = true;
 	}
-	else if (kbState[ SDL_SCANCODE_EQUALS] | kbState[ SDL_SCANCODE_KP_PLUS ])
+	else if (kbState[ SDL_SCANCODE_EQUALS] || kbState[ SDL_SCANCODE_KP_PLUS ])
 	{
 		makeChicken();
 	}
-else if (kbState[SDL_SCANCODE_MINUS] || kbState[SDL_SCANCODE_KP_MINUS])
+	else if (kbState[SDL_SCANCODE_MINUS] || kbState[SDL_SCANCODE_KP_MINUS])
 	{
 		// Remove a random chicken
 		int numOfBuckets = g_spriteBuckets.size();

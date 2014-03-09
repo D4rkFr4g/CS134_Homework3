@@ -19,6 +19,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="DrawUtils.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="player.cpp" />
     <ClCompile Include="PlayerSprite.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="TileLevel.cpp" />
@@ -31,6 +32,7 @@
     <None Include="Sprites\spriteSheet_chicken.tga" />
     <None Include="Sprites\sprite_chicken.tga" />
     <None Include="Sprites\zeldaTileset16.tga" />
+    <None Include="TODO.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AABB.h" />
@@ -40,6 +42,7 @@
     <ClInclude Include="AnimationFrame.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="DrawUtils.h" />
+    <ClInclude Include="player.h" />
     <ClInclude Include="PlayerSprite.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="TileLevel.h" />
