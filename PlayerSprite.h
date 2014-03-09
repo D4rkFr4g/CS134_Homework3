@@ -15,5 +15,7 @@ public:
 	bool isAlive;
 	int health;
 	int score;
+	int state;
+	int prevState;
 };
 

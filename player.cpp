@@ -1,5 +1,7 @@
 #include "player.h"
 
+enum {IDLE, WALKING, RUN_SHOOTING, JUMPING, PRONE, PRONE_SHOOTING, IDLE_SHOOT, WALKING_GUN_UP, WALKING_GUN_DOWN};
+
 PlayerSprite player::makePlayer(GLuint texture, int textureWidth, int textureHeight)
 {
 	PlayerSprite player;
@@ -128,19 +130,216 @@ PlayerSprite player::makePlayer(GLuint texture, int textureWidth, int textureHei
 
 void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, unsigned char* kbPrevState)
 {
-	bool isPlayerInput = false;
-	bool isPlayerShooting = false;
-
 	// Player Direction
 	if (kbState[SDL_SCANCODE_A] && !kbPrevState[SDL_SCANCODE_A])
 		player->isFlippedX = true;
 	else if (kbState[SDL_SCANCODE_D] && !kbPrevState[SDL_SCANCODE_D])
 		player->isFlippedX = false;
 
-	// Player commands
-	if (kbState[SDL_SCANCODE_SPACE])
-		isPlayerShooting = true;
+	// Player States
+	if (player->state == IDLE)
+	{
+		// Handle State Transition
+		if (player->state != player->prevState)
+		{
+			player->setAnimation("Idle");
+			player->prevState = player->state;
+		}
 
+		// Check for new Transition
+		if (kbState[SDL_SCANCODE_A] || kbState[SDL_SCANCODE_D])
+			player->state = WALKING;
+		else if (kbState[SDL_SCANCODE_J])
+			player->state = IDLE_SHOOT;
+		else if (kbState[SDL_SCANCODE_S])
+			player->state = PRONE;
+		else if (kbState[SDL_SCANCODE_SPACE])
+			player->state = JUMPING;
+	}
+	else if (player->state == WALKING)	
+	{
+		// Handle State Transition
+		if (player->state != player->prevState)
+		{
+			player->setAnimation("Walking");
+			player->prevState = player->state;
+		}
+
+		// Check for new Transition
+		if (!kbState[SDL_SCANCODE_A] && !kbState[SDL_SCANCODE_D])
+			player->state = IDLE;
+		else if (kbState[SDL_SCANCODE_J])
+			player->state = RUN_SHOOTING;
+		else if (kbState[SDL_SCANCODE_S])
+			player->state = PRONE;
+		else if (kbState[SDL_SCANCODE_SPACE])
+			player->state = JUMPING;
+	}
+	else if (player->state == RUN_SHOOTING)
+	{
+		// Handle State Transition
+		if (player->state != player->prevState)
+		{
+			player->setAnimation("RunShooting");
+			player->prevState = player->state;
+		}
+
+		// Check for new Transition
+		if (!kbState[SDL_SCANCODE_A] && !kbState[SDL_SCANCODE_D])
+		{
+			if (kbState[SDL_SCANCODE_J])
+				player->state = IDLE_SHOOT;
+			else
+				player->state = IDLE;
+		}
+		else if ((kbState[SDL_SCANCODE_A] || kbState[SDL_SCANCODE_D]) && !kbState[SDL_SCANCODE_J])
+			player->state = WALKING;
+		else if (kbState[SDL_SCANCODE_S])
+		{
+			if (kbState[SDL_SCANCODE_J])
+				player->state = PRONE_SHOOTING;
+			else
+				player->state = PRONE;
+		}
+		else if (kbState[SDL_SCANCODE_SPACE])
+			player->state = JUMPING;
+	}
+	else if (player->state == JUMPING)
+	{
+		// Handle State Transition
+		if (player->state != player->prevState)
+		{
+			player->setAnimation("Jumping");
+			player->prevState = player->state;
+		}
+
+		// Check for new Transition
+		if (!kbState[SDL_SCANCODE_A] && !kbState[SDL_SCANCODE_D])
+		{
+			if (kbState[SDL_SCANCODE_J])
+				player->state = IDLE_SHOOT;
+			else
+				player->state = IDLE;
+		}
+		else if (kbState[SDL_SCANCODE_A] || kbState[SDL_SCANCODE_D])
+		{
+			if(kbState[SDL_SCANCODE_J])
+				player->state = RUN_SHOOTING;
+			else
+				player->state = WALKING;
+		}
+		else if (kbState[SDL_SCANCODE_S])
+		{
+			if (kbState[SDL_SCANCODE_J])
+				player->state = PRONE_SHOOTING;
+			else
+				player->state = PRONE;
+		}
+		else if (kbState[SDL_SCANCODE_SPACE])
+			player->state = JUMPING;
+	}
+	else if (player->state == PRONE)
+	{
+		// Handle State Transition
+		if (player->state != player->prevState)
+		{
+			player->setAnimation("Prone");
+			player->prevState = player->state;
+		}
+
+		// Check for new Transition
+		if (!kbState[SDL_SCANCODE_S] && !kbState[SDL_SCANCODE_A] && !kbState[SDL_SCANCODE_D] && !kbState[SDL_SCANCODE_SPACE])
+		{
+			if (kbState[SDL_SCANCODE_J])
+				player->state = IDLE_SHOOT;
+			else
+				player->state = IDLE;
+		}
+		else if (kbState[SDL_SCANCODE_A] || kbState[SDL_SCANCODE_D])
+		{
+			// Fix for Gun Up / Gun Down
+			if(kbState[SDL_SCANCODE_J])
+				player->state = RUN_SHOOTING;
+			else
+				player->state = WALKING;
+		}
+		else if (kbState[SDL_SCANCODE_J])
+		{
+			player->state = PRONE_SHOOTING;
+		}
+		else if (kbState[SDL_SCANCODE_SPACE])
+			player->state = JUMPING;
+	}
+	else if (player->state == PRONE_SHOOTING)
+	{
+		// Handle State Transition
+		if (player->state != player->prevState)
+		{
+			player->setAnimation("ProneShooting");
+			player->prevState = player->state;
+		}
+
+		// Check for new Transition
+		if (!kbState[SDL_SCANCODE_S] && !kbState[SDL_SCANCODE_A] && !kbState[SDL_SCANCODE_D] && !kbState[SDL_SCANCODE_SPACE])
+		{
+			if (kbState[SDL_SCANCODE_J])
+				player->state = IDLE_SHOOT;
+			else
+				player->state = IDLE;
+		}
+		else if (kbState[SDL_SCANCODE_A] || kbState[SDL_SCANCODE_D])
+		{
+			// Fix for Gun Up / Gun Down
+			if(kbState[SDL_SCANCODE_J])
+				player->state = RUN_SHOOTING;
+			else
+				player->state = WALKING;
+		}
+		else if (kbState[SDL_SCANCODE_S] && !kbState[SDL_SCANCODE_J])
+		{
+			player->state = PRONE;
+		}
+		else if (kbState[SDL_SCANCODE_SPACE])
+			player->state = JUMPING;
+	}
+	else if (player->state == IDLE_SHOOT)
+	{
+		// Handle State Transition
+		if (player->state != player->prevState)
+		{
+			player->setAnimation("Shooting");
+			player->prevState = player->state;
+		}
+
+		// Check for new Transition
+		if (!kbState[SDL_SCANCODE_J] && !kbState[SDL_SCANCODE_A] && !kbState[SDL_SCANCODE_D] && !kbState[SDL_SCANCODE_SPACE])
+		{
+			player->state = IDLE;
+		}
+		else if (kbState[SDL_SCANCODE_A] || kbState[SDL_SCANCODE_D])
+		{
+			// Fix for Gun Up / Gun Down
+			if(kbState[SDL_SCANCODE_J])
+				player->state = RUN_SHOOTING;
+			else
+				player->state = WALKING;
+		}
+		else if (kbState[SDL_SCANCODE_S])
+		{
+			if (kbState[SDL_SCANCODE_J])
+				player->state = PRONE_SHOOTING;
+			else
+				player->state = PRONE;
+		}
+		else if (kbState[SDL_SCANCODE_SPACE])
+			player->state = JUMPING;
+	}
+
+
+
+
+
+/*
 	// Running States
 	if ((kbState[SDL_SCANCODE_A] || kbState[SDL_SCANCODE_D]) && !kbState[SDL_SCANCODE_S] )
 	{
@@ -172,4 +371,5 @@ void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, 
 	{
 		player->setAnimation("Idle");
 	}
+	*/
 }
