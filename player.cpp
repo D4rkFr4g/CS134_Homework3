@@ -14,6 +14,7 @@ PlayerSprite player::makePlayer(GLuint texture, int textureWidth, int textureHei
 
 	player = PlayerSprite(texture, startX, startY, 100, 100, 
 		0, 8 * vSize, 2 * uSize , 3 * vSize, health);
+	player.maxSpeedX = 500;
 
 	int numFrames = 1;
 	int timeToNextFrame = 100;
@@ -81,12 +82,13 @@ PlayerSprite player::makePlayer(GLuint texture, int textureWidth, int textureHei
 	player.animations[animation_death.name] = AnimationData(animation_death, timeToNextFrame, false);
 
 	// IdleShooting Animation
-	numFrames = 3;
+	numFrames = 4;
 	timeToNextFrame = 20;
 	AnimationFrame* frames_shooting = new AnimationFrame[numFrames];
 	frames_shooting[0] = AnimationFrame(6 * uSize, 11 * vSize, 3 * uSize, 3 * vSize);
-	frames_shooting[1] = AnimationFrame(0 * uSize, 11 * vSize, 3 * uSize, 3 * vSize);
-	frames_shooting[2] = AnimationFrame(3 * uSize, 11 * vSize, 3 * uSize, 3 * vSize);
+	frames_shooting[1] = AnimationFrame(3 * uSize, 11 * vSize, 3 * uSize, 3 * vSize);
+	frames_shooting[2] = AnimationFrame(0 * uSize, 11 * vSize, 3 * uSize, 3 * vSize);
+	frames_shooting[3] = AnimationFrame(3 * uSize, 11 * vSize, 3 * uSize, 3 * vSize);
 	Animation animation_shooting = Animation("Shooting", frames_shooting, numFrames);
 	player.animations[animation_shooting.name] = AnimationData(animation_shooting, timeToNextFrame, true);
 
@@ -185,7 +187,7 @@ void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, 
 			player->setAnimation("Walking");
 			player->prevState = player->state;
 
-			player->setSpeed(maxSpeed,0);
+			player->setSpeed(player->maxSpeedX,0);
 			if (player->isFlippedX)
 				player->speedX *= -1;
 		}
@@ -209,7 +211,7 @@ void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, 
 			player->setAnimation("RunShooting");
 			player->prevState = player->state;
 
-			player->setSpeed(maxSpeed,0);
+			player->setSpeed(player->maxSpeedX,0);
 			if (player->isFlippedX)
 				player->speedX *= -1;
 		}

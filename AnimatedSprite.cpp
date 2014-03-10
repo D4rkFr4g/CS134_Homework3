@@ -12,6 +12,8 @@ AnimatedSprite::AnimatedSprite(GLuint texture, int x, int y, int width, int heig
 	//idleAnimation = AnimationData();
 	this->curAnimation = AnimationData();
 	this->isAnimated = true;
+	maxSpeedX = 0;
+	maxSpeedY = 0;
 }
 
 AnimatedSprite::~AnimatedSprite(void)

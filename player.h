@@ -6,9 +6,6 @@ class player
 {
 public:
 
-	// Global Variables
-	static const int maxSpeed = 300;
-
 	// Functions
 	static PlayerSprite makePlayer(GLuint texture, int textureWidth, int textureHeight);
 	static void playerKeyboard(PlayerSprite* player, const unsigned char* kbState, unsigned char* kbPrevState);
