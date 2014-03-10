@@ -3,9 +3,20 @@
  <tileset firstgid="1" name="astroTileset" tilewidth="32" tileheight="32">
   <image source="astroTileset.png" width="512" height="448"/>
  </tileset>
- <layer name="Tile Layer 1" width="180" height="15">
+ <tileset firstgid="225" name="tileType32" tilewidth="32" tileheight="32">
+  <image source="tileType32.png" trans="ffffff" width="320" height="64"/>
+ </tileset>
+ <layer name="Tile Map" width="180" height="15">
   <data encoding="base64" compression="zlib">
-   eJzt2EFOwkAUBuAnNZGAbkxaZdWiosACuYaE06Ar1gRdeQ09gy5ED6Acyb/pNJm0jWVsG4byL76k06btm+bNn0k9ETkgqgnPghqIysJ+pjphP1OdhP3cgBacQhuO4cSC2ohMxf0cj8/gHDpbrusTviz4PrRbLuASDuEKenANN+qc7giaFdfjqHd9wEod92EAw4yaiHSBAVeq32+b1EOUNN7QK3QlynN9PRTJbEfS6+vFoCYq7tmCGsqcy6a950vU/9/wA2s1LpLZWc/z//ksIhO3kl4PWZkd5vVI3ZOVv3lZPLVgrrSf4sx+g3d17GrXgxzMYrJJMrMXMNGu38nf+x1mMRFRtWZwDw8wT1jCIzxJ9f+uiX4B8wlXug==
+   eJzt2EtOwlAYBeCfRyLhERMSHo6K8nYgbEPjaoQRY6OMXIUG1iADgQUIQ9yNh/QSbtrGUkvDTTmDLync0P4l5540LYtIgigmygbMQHQszDPFCfNMcbLNcxKyUIQc5KFgwGxEfvS8Xso+z7v1ClTh6sRzLmBpwP9FZtrAj7jzegN1SEMDmtCCtvpOdwGZiOdMqWt9wVwdd6ALtx4z0fl4h1f4kH0+9Lw2oBZASaJ/3g4yD5FT/0BTuBa7z/U9E6azU+Leg5MAM1F4bwbMcMx7OTR7ltj5/4YVrNXnMJ3tdT7rn+ciCqIn7v3g1dnbvr5Tv/HqX78ufjTgXuk87Tr7E2bquKSt13ywi8kkzs5+hgdt/V7+ft5hFxMRResJBjCEkcOL2O8MxxL9u2uiX5PJXZ4=
+  </data>
+ </layer>
+ <layer name="Tile Type" width="180" height="15">
+  <properties>
+   <property name="offset" value="255"/>
+  </properties>
+  <data encoding="base64" compression="zlib">
+   eJztwwENwCAQBLD37xIYbEwFZ4OkTdqqqufIJ2eufPPLnX8BAAAAAAAAAAAAcKsD0e8I+A==
   </data>
  </layer>
 </map>

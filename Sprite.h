@@ -35,6 +35,7 @@ public:
 	bool isFlippedX;
 	bool isFlippedY;
 	AABB collider;
+	int type;
 
 private:
 	void initialize(GLuint texture, int x, int y, int width, int height, GLfloat tu, GLfloat tv, GLfloat tSizeX, GLfloat tSizeY);

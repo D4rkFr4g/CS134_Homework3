@@ -30,6 +30,7 @@ void Camera::initialize(int x, int y, int minX, int maxX, int minY, int maxY)
 	collider.x = x - overrage;
 	collider.y = y - overrage;
 	overrage = 64;
+	isFollowing = false;
 }
 /*-----------------------------------------------*/
 void Camera::updateResolution(int width, int height)
@@ -61,13 +62,16 @@ void Camera::updateY(int value)
 /*-----------------------------------------------*/
 void Camera::follow(int x, int y, int width, int height)
 {
-	// Put in center of screen
-	this->x = (x + (width/2)) - (this->width / 2); 
-	this->y = (y + (height/2)) - (this->height / 2);
+	if (isFollowing)
+	{
+		// Put in center of screen
+		this->x = (x + (width/2)) - (this->width / 2); 
+		this->y = (y + (height/2)) - (this->height / 2);
 
-	lockCameraToBoundary();
+		lockCameraToBoundary();
 
-	updateCollider(this->x, this->y);
+		updateCollider(this->x, this->y);
+	}
 }
 /*-----------------------------------------------*/
 void Camera::lockCameraToBoundary()

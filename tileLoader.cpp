@@ -7,6 +7,7 @@ void tileLoader::loadTiles(const char* filename, TileLevel *level)
 	int x, y, width, height, tileWidth, tileHeight;
 	string tileFile = "";
 	int *tilesRead = NULL;
+	int *tileTypes = NULL;
 	int tileIndex = 0;
 	GLfloat tu, tv;
 
@@ -60,10 +61,11 @@ void tileLoader::loadTiles(const char* filename, TileLevel *level)
 	line = line.substr(offset,extension);
 	tileFile = line + ".tga";
 
-	getline(infile, line); // Blank line
-	getline(infile, line); // [layer]
-	getline(infile, line); // type=Tile Layer 1
-	getline(infile, line); // data = 
+	// Skip lines till 1st data
+	do
+	{
+		getline(infile, line);
+	}while (line.compare("data=") != 0);
 
 	// Debug Checks
 	if (0)
@@ -79,20 +81,44 @@ void tileLoader::loadTiles(const char* filename, TileLevel *level)
 	tilesRead = new int [width * height];
 
 	// Read Data
-	while(!infile.eof())
+	//while(!infile.eof())
+	do
 	{
 		getline(infile, line, ',');
 		if (line.compare("\n"))
 		{
 			tilesRead[tileIndex] = atoi(line.c_str());
 			tileIndex++;
-
+			 
 			// Debug Check
 			if (0)
 				cout << line << endl;
 		}
-	}
+	}while(tileIndex < (width * height));
 	
+	// Skip lines till 2nd data
+	do
+	{
+		getline(infile, line);
+	}while (line.compare("data=") != 0 && !infile.eof());
+
+	// Parse 2nd dataset as Tile Type
+	if (!infile.eof())
+	{
+		tileTypes = new int[width * height];
+		tileIndex = 0;
+		do
+		{
+			getline(infile, line, ',');
+			tileTypes[tileIndex] = atoi(line.c_str());
+			tileIndex++;
+			 
+			// Debug Check
+			if (0)
+				cout << line << endl;
+		}while(tileIndex < (width * height));
+	}
+
 	// Debug Check all tiles read
 	if (0)
 	{
@@ -116,6 +142,7 @@ void tileLoader::loadTiles(const char* filename, TileLevel *level)
 	*level = TileLevel(width, height, tileWidth, tileHeight);
 
 	for (int i = 0; i < height; i++) // Row
+	{
 		for (int j = 0; j < width; j++) // Column
 		{
 			// Find Row / Column texture coords
@@ -129,10 +156,14 @@ void tileLoader::loadTiles(const char* filename, TileLevel *level)
 			x = j * tileWidth;
 			y = i * tileHeight;
 
-			//level->tileArray[i * width + j] = Sprite(tileSet, x, y, tileWidth, tileHeight, tu, tv, tSizeX, tSizeY);
-			level->tileArray.push_back(Sprite(tileSet, x, y, tileWidth, tileHeight, tu, tv, tSizeX, tSizeY));
+
+			Sprite* sprite = &Sprite(tileSet, x, y, tileWidth, tileHeight, tu, tv, tSizeX, tSizeY);
+			if (tileTypes != NULL)
+				sprite->type = tileTypes[tileIndex];
+			level->tileArray.push_back(*sprite);
 			tileIndex++;
 		}
+	}
 
 	// Cleanup
 	infile.close();

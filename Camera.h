@@ -22,6 +22,7 @@ public:
 	int minY, maxY;
 	int overrage;
 	AABB collider;
+	bool isFollowing;
 
 private:
 	void lockCameraToBoundary();

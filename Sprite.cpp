@@ -42,6 +42,7 @@ void Sprite::initialize(GLuint texture, int x, int y, int width, int height, GLf
 	collider = AABB(x, y, width, height);
 	speedX = 0;
 	speedY = 0;
+	type = 0;
 }
 
 void Sprite::draw(void)

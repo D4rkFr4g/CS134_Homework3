@@ -74,8 +74,8 @@ static int initSDL()
 	g_window = SDL_CreateWindow(
 	"Invincible Chickens",
 	SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-	g_windowHeight, g_windowHeight,
-	SDL_WINDOW_OPENGL);// | SDL_WINDOW_FULLSCREEN );
+	g_windowWidth, g_windowHeight,
+	SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);// | SDL_WINDOW_FULLSCREEN );
 	glCullFace( GL_BACK );
 
 	if( !g_window ) 
@@ -361,6 +361,14 @@ static void keyboard()
 {
 	player::playerKeyboard(&g_player, kbState, kbPrevState);
 
+	if (g_cam.isFollowing && (kbState[SDL_SCANCODE_UP] | kbState[SDL_SCANCODE_DOWN] | kbState[SDL_SCANCODE_LEFT] | kbState[SDL_SCANCODE_RIGHT]))
+		g_cam.isFollowing = false;
+	else if (!g_cam.isFollowing)
+	{
+		if (kbState[SDL_SCANCODE_W] | kbState[SDL_SCANCODE_A] | kbState[SDL_SCANCODE_D])
+			g_cam.isFollowing = true;
+	}
+
 	if (kbState[ SDL_SCANCODE_LEFT ])
 	{
 		g_cam.updateX(-camSpeed);
@@ -394,6 +402,21 @@ static void keyboard()
 		if (g_spriteBuckets[choice].size() > 0)
 			g_spriteBuckets[choice].pop_back();
 	}
+}
+/*-----------------------------------------------*/
+static void reshape(const int w, const int h) 
+{
+	/*	PURPOSE:		Resizes everything based on new window dimensions 
+		RECEIVES:	w - Width of window
+						h - Height of window
+		RETURNS:		 
+		REMARKS:		 
+	*/
+
+	g_windowWidth = w;
+	g_windowHeight = h;
+	glViewport(0, 0, w, h);
+	g_cam.updateResolution(w, h);
 }
 /*-----------------------------------------------*/
 int main( void )
@@ -433,6 +456,9 @@ int main( void )
 				case SDL_QUIT:
 				return 0;
 			}
+
+			if (event.window.event == SDL_WINDOWEVENT_RESIZED)
+				reshape(event.window.data1,event.window.data2);
 		}
 
 		// Game logic goes here
