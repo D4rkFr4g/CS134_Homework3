@@ -75,7 +75,7 @@ static int initSDL()
 	"Invincible Chickens",
 	SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 	g_windowHeight, g_windowHeight,
-	SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN );
+	SDL_WINDOW_OPENGL);// | SDL_WINDOW_FULLSCREEN );
 	glCullFace( GL_BACK );
 
 	if( !g_window ) 

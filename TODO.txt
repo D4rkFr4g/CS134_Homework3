@@ -9,5 +9,3 @@ VBO Implementation
 
 Possible starting postion in tile map
 For uneven frame size scale size: requires a second frame array for size
-
-- Screen doesn't draw last column smoothly it jumps in as you walk.
