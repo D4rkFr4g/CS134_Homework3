@@ -132,11 +132,20 @@ void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, 
 {
 	// Player Direction
 	if (kbState[SDL_SCANCODE_A] && !kbPrevState[SDL_SCANCODE_A])
+	{
 		player->isFlippedX = true;
+		if (player->speedX > 0)
+			player->speedX *= -1;
+	}
 	else if (kbState[SDL_SCANCODE_D] && !kbPrevState[SDL_SCANCODE_D])
+	{
 		player->isFlippedX = false;
+		if (player->speedX < 0)
+			player->speedX *= -1;
+	}
 
 	// Player States
+	// IDLE State
 	if (player->state == IDLE)
 	{
 		// Handle State Transition
@@ -144,6 +153,8 @@ void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, 
 		{
 			player->setAnimation("Idle");
 			player->prevState = player->state;
+
+			player->setSpeed(0,0);
 		}
 
 		// Check for new Transition
@@ -156,6 +167,7 @@ void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, 
 		else if (kbState[SDL_SCANCODE_SPACE])
 			player->state = JUMPING;
 	}
+	// WALKING State
 	else if (player->state == WALKING)	
 	{
 		// Handle State Transition
@@ -163,6 +175,10 @@ void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, 
 		{
 			player->setAnimation("Walking");
 			player->prevState = player->state;
+
+			player->setSpeed(maxSpeed,0);
+			if (player->isFlippedX)
+				player->speedX *= -1;
 		}
 
 		// Check for new Transition
@@ -175,6 +191,7 @@ void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, 
 		else if (kbState[SDL_SCANCODE_SPACE])
 			player->state = JUMPING;
 	}
+	// RUN SHOOTING State
 	else if (player->state == RUN_SHOOTING)
 	{
 		// Handle State Transition
@@ -204,6 +221,7 @@ void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, 
 		else if (kbState[SDL_SCANCODE_SPACE])
 			player->state = JUMPING;
 	}
+	// JUMPING State
 	else if (player->state == JUMPING)
 	{
 		// Handle State Transition
@@ -238,6 +256,7 @@ void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, 
 		else if (kbState[SDL_SCANCODE_SPACE])
 			player->state = JUMPING;
 	}
+	// PRONE State
 	else if (player->state == PRONE)
 	{
 		// Handle State Transition
@@ -270,6 +289,7 @@ void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, 
 		else if (kbState[SDL_SCANCODE_SPACE])
 			player->state = JUMPING;
 	}
+	// PRONE SHOOTING State
 	else if (player->state == PRONE_SHOOTING)
 	{
 		// Handle State Transition
@@ -302,6 +322,7 @@ void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, 
 		else if (kbState[SDL_SCANCODE_SPACE])
 			player->state = JUMPING;
 	}
+	// IDLE SHOOT State
 	else if (player->state == IDLE_SHOOT)
 	{
 		// Handle State Transition
@@ -334,42 +355,4 @@ void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, 
 		else if (kbState[SDL_SCANCODE_SPACE])
 			player->state = JUMPING;
 	}
-
-
-
-
-
-/*
-	// Running States
-	if ((kbState[SDL_SCANCODE_A] || kbState[SDL_SCANCODE_D]) && !kbState[SDL_SCANCODE_S] )
-	{
-		if ((!kbPrevState[SDL_SCANCODE_A] && !kbPrevState[SDL_SCANCODE_D]) || kbState[SDL_SCANCODE_SPACE])
-		{
-			if (kbState[SDL_SCANCODE_SPACE] && !kbPrevState[SDL_SCANCODE_SPACE])
-				player->setAnimation("RunShooting");
-			else if (!kbState[SDL_SCANCODE_SPACE])
-				player->setAnimation("Walking");
-		}
-		
-		isPlayerInput = true;
-	}
-	
-	// Crouching State
-	if (kbState[SDL_SCANCODE_S])
-	{
-		if (!kbPrevState[SDL_SCANCODE_S])
-			player->setAnimation("Prone");
-
-		// Start shooting from prone
-		if (kbState[SDL_SCANCODE_SPACE] && !kbPrevState[SDL_SCANCODE_SPACE])
-			player->setAnimation("ProneShooting");
-
-		isPlayerInput = true;
-	}
-	
-	if (!isPlayerInput)
-	{
-		player->setAnimation("Idle");
-	}
-	*/
 }

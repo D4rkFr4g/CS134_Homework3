@@ -75,7 +75,7 @@ static int initSDL()
 	"Invincible Chickens",
 	SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
 	g_windowHeight, g_windowHeight,
-	SDL_WINDOW_OPENGL);// | SDL_WINDOW_FULLSCREEN );
+	SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN );
 	glCullFace( GL_BACK );
 
 	if( !g_window ) 
@@ -298,14 +298,13 @@ Uint32 updateSprites(Uint32 interval, void *param)
 				}
 				if (j >= 0)
 					g_spriteBuckets[bucket][j].update(diff_time);
-
-				//TODO update/move chicken in a bucket
 			}
 		}
 	}
 
 	// Update player
 	g_player.update(diff_time);
+	g_cam.follow(g_player.x, g_player.y, g_player.width, g_player.height);
 
 	return interval;
 }
