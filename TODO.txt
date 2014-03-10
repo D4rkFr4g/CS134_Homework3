@@ -1,5 +1,3 @@
-PlayerSprite Implementation
-
 Lock Graphics Framerate to 60fps
 Lock Physics Framerate to 100fps
 
@@ -7,5 +5,5 @@ VBO Implementation
 
 
 
-Possible starting postion in tile map
+Possible starting position in tile map
 For uneven frame size scale size: requires a second frame array for size

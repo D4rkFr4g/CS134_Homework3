@@ -41,7 +41,9 @@ SDL_Window* g_window;
 float color[] = {0,0,0};
 float currentDirection = 1;
 int g_windowWidth = 640;
+int g_windowOriginalWidth;
 int g_windowHeight = 480;
+int g_windowOriginalHeight;
 int g_windowMaxWidth = 0;
 int g_windowMaxHeight = 0;
 Camera g_cam;
@@ -115,7 +117,9 @@ static void init2D()
 /*-----------------------------------------------*/
 static void initCamera()
 {
-	//g_cam = Camera(g_windowWidth, g_windowHeight, 0, g_windowMaxWidth, 0, g_windowMaxHeight);
+	g_windowOriginalWidth = g_windowWidth;
+	g_windowOriginalHeight = g_windowHeight;
+
 	TileLevel currentLevel = g_level[g_currentLevel];
 
 	g_windowMaxWidth = (currentLevel.width * currentLevel.tilesWidth);
@@ -123,6 +127,8 @@ static void initCamera()
 
 	g_cam = Camera(0, 0, 0, g_windowMaxWidth - g_windowWidth, 0, g_windowMaxHeight - g_windowHeight);
 	g_cam.updateResolution(g_windowWidth, g_windowHeight);
+
+	g_cam.isFollowing = true;
 }
 /*-----------------------------------------------*/
 static int whichBucket(int x, int y)
@@ -471,7 +477,7 @@ int main( void )
 		
 		// All calls to glDrawSprite go here
 		clearBackground();
-		g_level[g_currentLevel].drawLevel(g_cam.x, g_cam.y, g_windowWidth, g_windowHeight);
+		g_level[g_currentLevel].drawLevel(g_cam.x, g_cam.y, g_windowOriginalWidth, g_windowOriginalHeight);
 		drawSprites();
 
 		SDL_GL_SwapWindow( g_window );
