@@ -14,10 +14,10 @@ PlayerSprite player::makePlayer(GLuint texture, int textureWidth, int textureHei
 
 	player = PlayerSprite(texture, startX, startY, 100, 100, 
 		0, 8 * vSize, 2 * uSize , 3 * vSize, health);
-	player.maxSpeedX = 500;
+	player.maxSpeedX = 200;
 
 	int numFrames = 1;
-	int timeToNextFrame = 100;
+	int timeToNextFrame = 200;
 
 	// Idle Animation
 	AnimationFrame* frames_idle = new AnimationFrame[numFrames];
@@ -74,7 +74,7 @@ PlayerSprite player::makePlayer(GLuint texture, int textureWidth, int textureHei
 
 	// Death Animation
 	numFrames = 2;
-	timeToNextFrame = 75;
+	timeToNextFrame = 150;
 	AnimationFrame* frames_death = new AnimationFrame[numFrames];
 	frames_death[0] = AnimationFrame(21 * uSize, 11 * vSize, 3 * uSize, 3 * vSize);
 	frames_death[1] = AnimationFrame(24 * uSize, 11 * vSize, 3 * uSize, 3 * vSize);
@@ -83,7 +83,7 @@ PlayerSprite player::makePlayer(GLuint texture, int textureWidth, int textureHei
 
 	// IdleShooting Animation
 	numFrames = 4;
-	timeToNextFrame = 20;
+	timeToNextFrame = 40;
 	AnimationFrame* frames_shooting = new AnimationFrame[numFrames];
 	frames_shooting[0] = AnimationFrame(6 * uSize, 11 * vSize, 3 * uSize, 3 * vSize);
 	frames_shooting[1] = AnimationFrame(3 * uSize, 11 * vSize, 3 * uSize, 3 * vSize);
@@ -94,7 +94,7 @@ PlayerSprite player::makePlayer(GLuint texture, int textureWidth, int textureHei
 
 	// RunShooting Animation
 	numFrames = 8;
-	timeToNextFrame = 50;
+	timeToNextFrame = 100;
 	AnimationFrame* frames_runShooting = new AnimationFrame[numFrames];
 	frames_runShooting[0] = AnimationFrame(12 * uSize, 7 * vSize, 3 * uSize, 3 * vSize);
 	frames_runShooting[1] = AnimationFrame(0 * uSize, 7 * vSize, 3 * uSize, 3 * vSize);
@@ -109,7 +109,7 @@ PlayerSprite player::makePlayer(GLuint texture, int textureWidth, int textureHei
 
 	// ProneShooting Animation
 	numFrames = 3;
-	timeToNextFrame = 20;
+	timeToNextFrame = 40;
 	AnimationFrame* frames_proneShooting = new AnimationFrame[numFrames];
 	frames_proneShooting[0] = AnimationFrame(6 * uSize, 0 * vSize, 3 * uSize, 3 * vSize);
 	frames_proneShooting[1] = AnimationFrame(0 * uSize, 0 * vSize, 3 * uSize, 3 * vSize);
@@ -119,7 +119,7 @@ PlayerSprite player::makePlayer(GLuint texture, int textureWidth, int textureHei
 
 	// LookUp Animation
 	numFrames = 1;
-	timeToNextFrame = 100;
+	timeToNextFrame = 200;
 	AnimationFrame* frames_lookUp = new AnimationFrame[numFrames];
 	frames_lookUp[0] = AnimationFrame(24 * uSize, 3 * vSize, 3 * uSize, 3 * vSize);
 	Animation animation_lookUp = Animation("LookUp", frames_lookUp, numFrames);

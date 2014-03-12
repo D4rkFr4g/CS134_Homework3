@@ -32,9 +32,9 @@ const int g_numOfLevels = 1;
 const int spriteSize = 64;
 const int spriteReserve = 50000;
 const int initialChickens = 20;
-const int chickenSpeed = 50;
+const int chickenSpeed = 25;
 const unsigned char* kbState = NULL;
-const int g_numOfCheckBuckets = 9;
+const int g_numOfCheckBuckets = 9; 
 
 // Global Variables
 SDL_Window* g_window;
@@ -53,7 +53,7 @@ std::vector<std::vector<AnimatedSprite>> g_spriteBuckets;
 int* g_checkBuckets;
 GLuint spriteTexture;
 GLuint playerTexture;
-int diff_time;
+//int diff_time;
 unsigned char kbPrevState[SDL_NUM_SCANCODES] = {0};
 bool shouldExit = false;
 PlayerSprite g_player;
@@ -196,7 +196,7 @@ static void makeChicken()
 
 	// Walking Animation
 	int numFrames = 2;
-	int timeToNextFrame = 150;
+	int timeToNextFrame = 300;
 	AnimationFrame* frames_walking = new AnimationFrame[numFrames];
 	frames_walking[0] = AnimationFrame(0,0,0.5,1);
 	frames_walking[1] = AnimationFrame(0.5,0,0.5,1);
@@ -226,7 +226,7 @@ static void makeChicken()
 	g_spriteBuckets[whichBucket(x, y)].push_back(sprite_chicken);
 }
 /*-----------------------------------------------*/
-Uint32 chickenAI(Uint32 interval, void *param)
+void chickenAI(int diff_time)
 {
 	updateCheckBuckets();
 	int numOfBuckets = g_spriteBuckets.size();
@@ -242,24 +242,28 @@ Uint32 chickenAI(Uint32 interval, void *param)
 				int speedX = chicken->speedX;
 				int speedY = chicken->speedY;
 
-				// If stopped Restart Chicken
+				// If stopped Restart Chicken Maybe
 				if (speedX == 0 && speedY == 0)
 				{
-					speedX = getSpeed();
-					speedY = getSpeed();
-					chicken->setAnimation("Walking");
+					int willRestart = rand() % 100;
+					if (!willRestart)
+					{
+						speedX = getSpeed();
+						speedY = getSpeed();
+						chicken->setAnimation("Walking");
 
-					// Set direction
-					if (speedX < 0)
-						chicken->isFlippedX = true;
-					else if (speedX > 0)
-						chicken->isFlippedX = false;
+						// Set direction
+						if (speedX < 0)
+							chicken->isFlippedX = true;
+						else if (speedX > 0)
+							chicken->isFlippedX = false;
+					}
 				}
 				else
 				{
 					// Randomly stop chickens
-					int willStop = rand() % 2;
-					if (willStop)
+					int willStop = rand() % 250;
+					if (!willStop)
 					{
 						speedX = 0;
 						speedY = 0;
@@ -272,10 +276,10 @@ Uint32 chickenAI(Uint32 interval, void *param)
 		}
 	}
 
-	return interval;
+	//return interval;
 }
 /*-----------------------------------------------*/
-Uint32 updateSprites(Uint32 interval, void *param)
+void updateSprites(int diff_time)
 {
 	updateCheckBuckets();
 
@@ -312,7 +316,7 @@ Uint32 updateSprites(Uint32 interval, void *param)
 	g_player.update(diff_time);
 	g_cam.follow(g_player.x, g_player.y, g_player.width, g_player.height);
 
-	return interval;
+	//return interval;
 }
 /*-----------------------------------------------*/
 static void drawSprites()
@@ -439,15 +443,15 @@ int main( void )
 	initBuckets();
 	loadSprites();
 
-	SDL_TimerID spriteTimer = SDL_AddTimer(33, updateSprites, (void *) "spriteTimer Callback");
-	SDL_TimerID AITimer = SDL_AddTimer(2000, chickenAI, (void *) "chickenAI Callback");
-	int last_time = 0;
-	int cur_time = 0;
-	diff_time = 0;
+	// Timers
+	int ticksPerFrame = 1000 / 60;
+	int prevTick = SDL_GetTicks();
+	int ticksPerPhysics = 1000 / 100;
+	int prevPhysicsTick = prevTick;
 
 	// Read keyboard status
 	kbState = SDL_GetKeyboardState( NULL );
-
+	
 	// The game loop
 	while( !shouldExit ) 
 	{
@@ -468,18 +472,33 @@ int main( void )
 		}
 
 		// Game logic goes here
-		keyboard();
-
-		// Timer updates
-		cur_time = SDL_GetTicks();
-		diff_time = cur_time - last_time;
-		last_time = cur_time;
 		
-		// All calls to glDrawSprite go here
-		clearBackground();
-		g_level[g_currentLevel].drawLevel(g_cam.x, g_cam.y, g_windowOriginalWidth, g_windowOriginalHeight);
-		drawSprites();
+		// Graphics Code
+		int tick = SDL_GetTicks();
+		do 
+		{
+			// All draw calls go here
+			clearBackground();
+			g_level[g_currentLevel].drawLevel(g_cam.x, g_cam.y, g_windowOriginalWidth, g_windowOriginalHeight);
+			drawSprites();
 
+			// Timer updates
+			SDL_Delay( max( 0, ticksPerFrame - (tick - prevTick) ));
+			tick = SDL_GetTicks();
+		} while( ticksPerFrame - (tick - prevTick) > 0 );
+		prevTick = tick;
+		
+		// Physics Code
+		while( tick > prevPhysicsTick + ticksPerPhysics ) 
+		{
+			// Update physics
+			keyboard();
+			chickenAI(ticksPerPhysics);
+			updateSprites(ticksPerPhysics);
+
+			// Update Timers
+			prevPhysicsTick += ticksPerPhysics;
+		}
 		SDL_GL_SwapWindow( g_window );
 	}
 
