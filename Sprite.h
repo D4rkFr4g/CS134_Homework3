@@ -36,6 +36,7 @@ public:
 	bool isFlippedY;
 	AABB collider;
 	AABB prevCollider;
+	float prevPosX, prevPosY;
 	int type;
 
 private:

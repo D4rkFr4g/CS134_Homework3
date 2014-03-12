@@ -1,7 +1,8 @@
 #include "player.h"
 
-enum {IDLE, WALKING, RUN_SHOOTING, JUMPING, PRONE, PRONE_SHOOTING, IDLE_SHOOT, WALKING_GUN_UP, WALKING_GUN_DOWN};
+enum {IDLE, WALKING, RUN_SHOOTING, JUMPING, PRONE, PRONE_SHOOTING, IDLE_SHOOT, WALKING_GUN_UP, WALKING_GUN_DOWN, DEATH};
 enum {COLLISION_NULL, COLLISION_GROUND, COLLISION_DEATH, COLLISION_PLATFORM, COLLISION_START, COLLISION_END};
+enum {LEFT, RIGHT, TOP, BOTTOM};
 
 PlayerSprite player::makePlayer(GLuint texture, int textureWidth, int textureHeight)
 {
@@ -134,16 +135,19 @@ PlayerSprite player::makePlayer(GLuint texture, int textureWidth, int textureHei
 void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, unsigned char* kbPrevState)
 {
 	// Player Direction
-	if (kbState[SDL_SCANCODE_A])
+	if (player->state != DEATH)
 	{
-		player->speedX = player->maxSpeedX;
-		player->isFlippedX = true;
-		player->speedX *= -1;
-	}
-	else if (kbState[SDL_SCANCODE_D])
-	{
-		player->speedX = player->maxSpeedX;
-		player->isFlippedX = false;
+		if (kbState[SDL_SCANCODE_A])
+		{
+			player->speedX = player->maxSpeedX;
+			player->isFlippedX = true;
+			player->speedX *= -1;
+		}
+		else if (kbState[SDL_SCANCODE_D])
+		{
+			player->speedX = player->maxSpeedX;
+			player->isFlippedX = false;
+		}
 	}
 
 	bool isIdle = (kbState[SDL_SCANCODE_W] | kbState[SDL_SCANCODE_A] | kbState[SDL_SCANCODE_S] | 
@@ -239,7 +243,7 @@ void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, 
 			player->setAnimation("Jumping");
 			player->prevState = player->state;
 
-			player->posY -= 2;
+			//player->posY -= 2;
 			player->isJumping = true;
 			if (player->jumpTicksRemaining <= 0)
 				player->jumpTicksRemaining = player->jumpTicks;
@@ -376,6 +380,16 @@ void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, 
 		else if (isJumping)
 			player->state = JUMPING;
 	}
+	else if (player->state == DEATH)
+	{
+		player->speedX = 0;
+		// Handle State Transition
+ 		if (player->state != player->prevState)
+		{
+			player->setAnimation("Death");
+			player->prevState = player->state;
+		}
+	}
 
 	// Debug for State
 	if (0)
@@ -403,20 +417,33 @@ void player::updatePhysics(PlayerSprite* player, int diff_time)
 	}
 }
 /*-----------------------------------------------*/
-void player::collisionResolution(PlayerSprite* player, int type)
+void player::collisionResolution(PlayerSprite* player, Sprite* sprite)
 {
 	// Debug Collision Type
 	if (0)
 	{
-		std::cout << "Collision Type = " << type << std::endl;
+		std::cout << "Collision Type = " << sprite->type << std::endl;
 	}
 
+	bool* sides = AABB::AABBwhichSideIntersected(&player->prevCollider, &player->collider, &sprite->collider);
+
 	// Ground Collision
-	if (type == COLLISION_GROUND)
+	if (sprite->type == COLLISION_GROUND)
 	{
-		player->isJumping = false;
-		player->speedY = 0;
+		if (sides[TOP])
+		{
+			player->isJumping = false;
+			player->speedY = 0;
+			player->updatePosition(player->posX, sprite->collider.y - 1);
+		}
 		//player->posY -= 0.025;
+	}
+	//if (sprite->type == COLLISION_END)
+	//	std::cout << "You Win" << std::endl;
+	if (sprite->type == COLLISION_DEATH)
+	{
+		player->state = DEATH;
+		player->speedX = 0;
 	}
 }
 /*-----------------------------------------------*/

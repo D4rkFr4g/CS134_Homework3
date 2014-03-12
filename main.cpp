@@ -185,8 +185,8 @@ static void loadSprites()
 		makeChicken();
 
 	g_player = player::makePlayer(playerTexture, *width, *height);
-	g_player.x = g_level[g_currentLevel].startX;
- 	g_player.y = g_level[g_currentLevel].startY;
+	g_player.posX = g_level[g_currentLevel].startX;
+ 	g_player.posY = g_level[g_currentLevel].startY;
 }
 /*-----------------------------------------------*/
 static void makeChicken()
@@ -285,16 +285,17 @@ void chickenAI(int diff_time)
 void updateSprites(int diff_time)
 {
 	// Update player
+	g_player.update(diff_time);
 	g_cam.follow(g_player.x, g_player.y, g_player.width, g_player.height);
-	
+
 	// Check Tile Collisions
 	vector<int>* collisions = g_level[g_currentLevel].checkCollision(&g_player.collider);
 	while (collisions->size() > 0)
 	{
-		player::collisionResolution(&g_player, collisions->front());
+		Sprite* sprite = &g_level->tileArray[collisions->front()];
+		player::collisionResolution(&g_player, sprite);
 		collisions->erase(collisions->begin());
 	}
-	g_player.update(diff_time);
 
 	// Update Other Sprites
 	updateCheckBuckets();
@@ -315,7 +316,7 @@ void updateSprites(int diff_time)
 
 				// Check for Collisions
 				if (g_player.collider.AABBIntersect(&sprite->collider))
-					player::collisionResolution(&g_player, sprite->type);
+					player::collisionResolution(&g_player, sprite);
 
 				// Rebucket if necessary
 				int newBucket = whichBucket(sprite->x, sprite->y);
@@ -376,7 +377,7 @@ static void loadLevel()
 		int type = level->tileArray[index].type;
 		if (type == startTile)
 		{
-			level->startX = level->tileArray[index].x;
+			level->startX = level->tileArray[index].x - level->tilesWidth;
 			level->startY = level->tileArray[index].y;
 		}
 	}
@@ -524,7 +525,8 @@ int main( void )
 
 			// Update Timers
 			prevPhysicsTick += ticksPerPhysics;
-		}
+		}
+
 		SDL_GL_SwapWindow( g_window );
 	}
 

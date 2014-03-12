@@ -22,7 +22,9 @@ AnimatedSprite::~AnimatedSprite(void)
 /*-----------------------------------------------*/
 void AnimatedSprite::update(int ms)
 {
-	// Store previous collider position
+	// Store previous position information
+	prevPosX = posX;
+	prevPosY = posY;
 	prevCollider.x = x;
 	prevCollider.y = y;
 
@@ -33,7 +35,7 @@ void AnimatedSprite::update(int ms)
 	posX += deltaX;
 	posY += deltaY;
 	x = (int) floor(posX);
-	y = (int) floor(posY);
+	y = (int) floor(posY) - height; // Bottom left coord adjustment
 	
 	// Update Animation
 	curAnimation.updateTime(ms);
@@ -55,4 +57,16 @@ void AnimatedSprite::update(int ms)
 void AnimatedSprite::setAnimation(std::string animation)
 {
 	curAnimation = animations[animation];
+}
+/*-----------------------------------------------*/
+void AnimatedSprite::updatePosition(float x , float y)
+{
+	float deltaX = x - this->x;
+	float delataY = y - this->y;
+	this->posX = x;
+	this->posY = y;
+	this->x = (int) floor(posX);
+	this->y = (int) floor(posY) - height;
+	collider.x += (int) floor(x);
+	collider.y += (int) floor(y);
 }

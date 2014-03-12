@@ -40,8 +40,31 @@ bool AABB::AABBIntersect(AABB* box)
 	return true;
 }
 
-bool* AABB::AABBwhichSideIntersected(AABB* prevBox1, AABB* currBox1, AABB* prevBox2, AABB* currBox2)
+bool* AABB::AABBwhichSideIntersected(AABB* prevBox1, AABB* currBox1, AABB* box2)
 {
-	bool* yo;
-	return yo;
+	bool* sides = new bool[4];
+
+	//Find direction of box one
+	/*
+	bool isMovingRight = currBox1->x > prevBox1->x;
+	bool isMovingLeft = currBox1->x < prevBox1->x;
+	bool isMovingUp = currBox1->y < prevBox1->x;
+	bool isMovingDown = currBox1->y > prevBox1->x;
+	*/
+
+	bool wasAbove = (prevBox1->y + prevBox1->h) < box2->y;
+	bool nowAbove = (currBox1->y + currBox1->h) < box2->y;
+	bool wasRight = prevBox1->x > (box2->x + box2->w);
+	bool nowRight = currBox1->x > (box2->x + box2->w);
+	bool wasBelow = prevBox1->y > (box2->y + box2->h);
+	bool nowBelow = currBox1->y > (box2->y + box2->h);
+	bool wasLeft = (prevBox1->x + prevBox1->w) < box2->x;
+	bool nowLeft = (currBox1->x + currBox1->w) < box2->x;
+
+	sides[0] = wasLeft && !nowLeft; // Box2 Hit from Left
+	sides[1] = wasRight && !nowRight; // Box2 Hit from Right
+	sides[2] = wasAbove && !nowAbove; // Box2 Hit from Top
+	sides[3] = wasBelow && !nowBelow; // Box2 Hit from Below
+
+	return sides;
 }

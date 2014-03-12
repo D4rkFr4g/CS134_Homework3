@@ -45,6 +45,8 @@ void Sprite::initialize(GLuint texture, int x, int y, int width, int height, GLf
 	speedX = 0;
 	speedY = 0;
 	type = 0;
+	prevPosX = 0;
+	prevPosY = 0;
 }
 /*-----------------------------------------------*/
 void Sprite::draw(void)
