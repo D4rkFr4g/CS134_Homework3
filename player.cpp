@@ -421,14 +421,13 @@ void player::collisionResolution(PlayerSprite* player, Sprite* sprite)
 {
 	// Debug Collision Type
 	if (0)
-	{
 		std::cout << "Collision Type = " << sprite->type << std::endl;
-	}
 
 	bool* sides = AABB::AABBwhichSideIntersected(&player->prevCollider, &player->collider, &sprite->collider);
 
+
 	// Ground Collision
-	if (sprite->type == COLLISION_GROUND)
+	if (sprite->type == COLLISION_GROUND || sprite->type == COLLISION_PLATFORM)
 	{
 		if (sides[TOP])
 		{
@@ -436,10 +435,22 @@ void player::collisionResolution(PlayerSprite* player, Sprite* sprite)
 			player->speedY = 0;
 			player->updatePosition(player->posX, sprite->collider.y - 1);
 		}
-		//player->posY -= 0.025;
+		if (sprite->type == COLLISION_GROUND)
+		{
+			if (sides[LEFT])
+			{
+				player->speedX = 0;
+				player->updatePosition(sprite->collider.x - player->collider.w - 1, player->posY);
+			}
+			else if (sides[RIGHT])
+			{
+				player->speedX = 0;
+				player->updatePosition(sprite->collider.x + sprite->collider.w + 1, player->posY);
+			}
+		}
 	}
-	//if (sprite->type == COLLISION_END)
-	//	std::cout << "You Win" << std::endl;
+	if (sprite->type == COLLISION_END)
+		std::cout << "You Win" << std::endl;
 	if (sprite->type == COLLISION_DEATH)
 	{
 		player->state = DEATH;
