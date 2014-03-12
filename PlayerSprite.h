@@ -17,5 +17,9 @@ public:
 	int score;
 	int state;
 	int prevState;
+	int jumpTicks;
+	int jumpTicksRemaining;
+	float jumpSpeed;
+	bool isJumping;
 };
 

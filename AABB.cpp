@@ -39,3 +39,9 @@ bool AABB::AABBIntersect(AABB* box)
 	
 	return true;
 }
+
+bool* AABB::AABBwhichSideIntersected(AABB* prevBox1, AABB* currBox1, AABB* prevBox2, AABB* currBox2)
+{
+	bool* yo;
+	return yo;
+}

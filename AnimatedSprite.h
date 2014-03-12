@@ -18,8 +18,8 @@ public:
 
 	// Variables
 	bool isAnimated;
-	int maxSpeedX;
-	int maxSpeedY;
+	float maxSpeedX;
+	float maxSpeedY;
 	AnimationData curAnimation;
 	std::map<std::string, AnimationData> animations;
 };

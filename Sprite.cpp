@@ -1,29 +1,30 @@
 #include "Sprite.h"
 
+
 Sprite::Sprite(void)
 {
 	initialize(0, 0, 0, 0, 0, 0, 0, 1, 1);
 }
-
+/*-----------------------------------------------*/
 Sprite::Sprite(GLuint texture, int width, int height)
 {
 	initialize(texture, 0, 0, width, height, 0, 0, 1, 1);
 }
-
+/*-----------------------------------------------*/
 Sprite::Sprite(GLuint texture, int x, int y, int width, int height)
 {
 	initialize(texture, x, y, width, height, 0, 0, 1, 1);
 }
-
+/*-----------------------------------------------*/
 Sprite::Sprite(GLuint texture, int x, int y, int width, int height, GLfloat tu, GLfloat tv, GLfloat tSizeX, GLfloat tSizeY)
 {
 	initialize(texture, x, y, width, height, tu, tv, tSizeX, tSizeY);
 }
-
+/*-----------------------------------------------*/
 Sprite::~Sprite(void)
 {
 }
-
+/*-----------------------------------------------*/
 void Sprite::initialize(GLuint texture, int x, int y, int width, int height, GLfloat tu, GLfloat tv, GLfloat tSizeX, GLfloat tSizeY)
 {
 	this->texture = texture;
@@ -40,21 +41,22 @@ void Sprite::initialize(GLuint texture, int x, int y, int width, int height, GLf
 	this->isFlippedX = false;
 	this->isFlippedY = false;
 	collider = AABB(x, y, width, height);
+	prevCollider = AABB(x, y, width, height);
 	speedX = 0;
 	speedY = 0;
 	type = 0;
 }
-
+/*-----------------------------------------------*/
 void Sprite::draw(void)
 {
 	glDrawSprite(texture, x, y, width, height);
 }
-
+/*-----------------------------------------------*/
 void Sprite::draw(int camX, int camY)
 {
 	glDrawSprite(texture, x - camX, y - camY, width, height);
 }
-
+/*-----------------------------------------------*/
 void Sprite::drawUV(int camX, int camY)
 {
 	GLfloat u = tu;
@@ -75,27 +77,27 @@ void Sprite::drawUV(int camX, int camY)
 
 	glDrawSprite(texture, x - camX, y - camY, width, height, u, v, uSize, vSize);
 }
-
+/*-----------------------------------------------*/
 void Sprite::update(int ms)
 {
 }
-	
-void Sprite::setSpeed(int speedX, int speedY)
+/*-----------------------------------------------*/
+void Sprite::setSpeed(float speedX, float speedY)
 {
 	this->speedX = speedX;
 	this->speedY = speedY;
 }
-
+/*-----------------------------------------------*/
 void Sprite::flipX()
 {	
 	isFlippedX = !isFlippedX;
 }
-
+/*-----------------------------------------------*/
 void Sprite::flipY()
 {	
 	isFlippedY = !isFlippedY;
 }
-		
+/*-----------------------------------------------*/		
 void Sprite::print()
 {
 	using namespace std;

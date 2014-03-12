@@ -1,6 +1,7 @@
 #include "player.h"
 
 enum {IDLE, WALKING, RUN_SHOOTING, JUMPING, PRONE, PRONE_SHOOTING, IDLE_SHOOT, WALKING_GUN_UP, WALKING_GUN_DOWN};
+enum {COLLISION_NULL, COLLISION_GROUND, COLLISION_DEATH, COLLISION_PLATFORM, COLLISION_START, COLLISION_END};
 
 PlayerSprite player::makePlayer(GLuint texture, int textureWidth, int textureHeight)
 {
@@ -8,13 +9,13 @@ PlayerSprite player::makePlayer(GLuint texture, int textureWidth, int textureHei
 	float cellSize = 16;
 	float uSize = 1 / (textureWidth / cellSize);
 	float vSize = 1 / (textureHeight / cellSize);
-	int startX = 20;
-	int startY = 120;
 	int health = 100;
 
-	player = PlayerSprite(texture, startX, startY, 100, 100, 
+	player = PlayerSprite(texture, 0, 0, 100, 100, 
 		0, 8 * vSize, 2 * uSize , 3 * vSize, health);
 	player.maxSpeedX = 200;
+	player.jumpSpeed = -300;
+	player.jumpTicks = 200;
 
 	int numFrames = 1;
 	int timeToNextFrame = 200;
@@ -129,28 +130,27 @@ PlayerSprite player::makePlayer(GLuint texture, int textureWidth, int textureHei
 	player.setAnimation("Idle");
 	return player;
 }
-
+/*-----------------------------------------------*/
 void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, unsigned char* kbPrevState)
 {
 	// Player Direction
-	if (kbState[SDL_SCANCODE_A] && !kbPrevState[SDL_SCANCODE_A])
+	if (kbState[SDL_SCANCODE_A])
 	{
+		player->speedX = player->maxSpeedX;
 		player->isFlippedX = true;
-		if (player->speedX > 0)
-			player->speedX *= -1;
+		player->speedX *= -1;
 	}
-	else if (kbState[SDL_SCANCODE_D] && !kbPrevState[SDL_SCANCODE_D])
+	else if (kbState[SDL_SCANCODE_D])
 	{
+		player->speedX = player->maxSpeedX;
 		player->isFlippedX = false;
-		if (player->speedX < 0)
-			player->speedX *= -1;
 	}
 
 	bool isIdle = (kbState[SDL_SCANCODE_W] | kbState[SDL_SCANCODE_A] | kbState[SDL_SCANCODE_S] | 
 		kbState[SDL_SCANCODE_D] | kbState[SDL_SCANCODE_J] | kbState[SDL_SCANCODE_SPACE]) != 1;
 	bool isWalking = (kbState[SDL_SCANCODE_A] | kbState[SDL_SCANCODE_D]) == 1;
 	bool isRunShooting = ((kbState[SDL_SCANCODE_A] | kbState[SDL_SCANCODE_D]) & kbState[SDL_SCANCODE_J]) == 1;
-	bool isJumping = kbState[SDL_SCANCODE_SPACE] == 1;
+	bool isJumping = kbState[SDL_SCANCODE_K] == 1;
 	bool isProne = kbState[SDL_SCANCODE_S] == 1;
 	bool isShooting = kbState[SDL_SCANCODE_J] == 1;
 	bool isProneShooting = (kbState[SDL_SCANCODE_S] & kbState[SDL_SCANCODE_J]) == 1;
@@ -165,7 +165,7 @@ void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, 
 			player->setAnimation("Idle");
 			player->prevState = player->state;
 
-			player->setSpeed(0,0);
+			player->speedX = 0;
 		}
 
 		// Check for new Transition
@@ -186,10 +186,6 @@ void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, 
 		{
 			player->setAnimation("Walking");
 			player->prevState = player->state;
-
-			player->setSpeed(player->maxSpeedX,0);
-			if (player->isFlippedX)
-				player->speedX *= -1;
 		}
 
 		// Check for new Transition
@@ -210,10 +206,6 @@ void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, 
 		{
 			player->setAnimation("RunShooting");
 			player->prevState = player->state;
-
-			player->setSpeed(player->maxSpeedX,0);
-			if (player->isFlippedX)
-				player->speedX *= -1;
 		}
 
 		// Check for new Transition
@@ -246,43 +238,51 @@ void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, 
 		{
 			player->setAnimation("Jumping");
 			player->prevState = player->state;
+
+			player->posY -= 2;
+			player->isJumping = true;
+			if (player->jumpTicksRemaining <= 0)
+				player->jumpTicksRemaining = player->jumpTicks;
 		}
 
 		// Check for new Transition
-		if (!isWalking)
+		if (!player->isJumping)
 		{
-			if (isShooting)
-				player->state = IDLE_SHOOT;
-			else
-				player->state = IDLE;
+			if (!isWalking)
+			{
+				if (isShooting)
+					player->state = IDLE_SHOOT;
+				else
+					player->state = IDLE;
+			}
+			else if (isWalking)
+			{
+				if(isShooting)
+					player->state = RUN_SHOOTING;
+				else
+					player->state = WALKING;
+			}
+			else if (isProne)
+			{
+				if (isShooting)
+					player->state = PRONE_SHOOTING;
+				else
+					player->state = PRONE;
+			}
+			else if (isJumping)
+				player->state = JUMPING;
 		}
-		else if (isWalking)
-		{
-			if(isShooting)
-				player->state = RUN_SHOOTING;
-			else
-				player->state = WALKING;
-		}
-		else if (isProne)
-		{
-			if (isShooting)
-				player->state = PRONE_SHOOTING;
-			else
-				player->state = PRONE;
-		}
-		else if (isJumping)
-			player->state = JUMPING;
 	}
 	// PRONE State
 	else if (player->state == PRONE)
 	{
+		player->speedX = 0;
+
 		// Handle State Transition
 		if (player->state != player->prevState)
 		{
 			player->setAnimation("Prone");
 			player->prevState = player->state;
-
-			player->setSpeed(0,0);
 		}
 
 		// Check for new Transition
@@ -311,13 +311,13 @@ void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, 
 	// PRONE SHOOTING State
 	else if (player->state == PRONE_SHOOTING)
 	{
+		player->speedX = 0;
+
 		// Handle State Transition
 		if (player->state != player->prevState)
 		{
 			player->setAnimation("ProneShooting");
 			player->prevState = player->state;
-
-			player->setSpeed(0,0);
 		}
 
 		// Check for new Transition
@@ -351,7 +351,7 @@ void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, 
 			player->setAnimation("Shooting");
 			player->prevState = player->state;
 
-			player->setSpeed(0,0);
+			player->speedX = 0;
 		}
 
 		// Check for new Transition
@@ -376,4 +376,47 @@ void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, 
 		else if (isJumping)
 			player->state = JUMPING;
 	}
+
+	// Debug for State
+	if (0)
+	{
+		if (player->state != player->prevState)
+		{
+			std::cout << "prevState = " << player->prevState << std::endl;
+			std::cout << "state = " << player->state << std::endl;
+		}
+	} 
 }
+/*-----------------------------------------------*/
+void player::updatePhysics(PlayerSprite* player, int diff_time)
+{
+	float gravity = (float) 9.8;
+
+	// Gravity
+	player->speedY = player->speedY + gravity;
+
+	// Jumping
+	if (player->state == JUMPING && player->jumpTicksRemaining > 0)
+	{
+		player->speedY = player->jumpSpeed;
+		player->jumpTicksRemaining -= diff_time;
+	}
+}
+/*-----------------------------------------------*/
+void player::collisionResolution(PlayerSprite* player, int type)
+{
+	// Debug Collision Type
+	if (0)
+	{
+		std::cout << "Collision Type = " << type << std::endl;
+	}
+
+	// Ground Collision
+	if (type == COLLISION_GROUND)
+	{
+		player->isJumping = false;
+		player->speedY = 0;
+		//player->posY -= 0.025;
+	}
+}
+/*-----------------------------------------------*/

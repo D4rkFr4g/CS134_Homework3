@@ -1,6 +1,3 @@
-Lock Graphics Framerate to 60fps
-Lock Physics Framerate to 100fps
-
 VBO Implementation
 
 

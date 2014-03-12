@@ -9,6 +9,7 @@ public:
 
 	// Functions
 	bool AABBIntersect(AABB* box);
+	static bool* AABBwhichSideIntersected(AABB* prevBox, AABB* currBox, AABB* prevBox2, AABB* currBox2);
 
 	// Variables
 	int x, y, w, h;

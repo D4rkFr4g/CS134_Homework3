@@ -4,7 +4,7 @@
 AnimatedSprite::AnimatedSprite(void) : Sprite()
 {
 }
-
+/*-----------------------------------------------*/
 AnimatedSprite::AnimatedSprite(GLuint texture, int x, int y, int width, int height, GLfloat tu, GLfloat tv, GLfloat tSizeX, GLfloat tSizeY)
 	: Sprite(texture, x, y, width, height, tu, tv, tSizeX, tSizeY)
 {
@@ -15,13 +15,17 @@ AnimatedSprite::AnimatedSprite(GLuint texture, int x, int y, int width, int heig
 	maxSpeedX = 0;
 	maxSpeedY = 0;
 }
-
+/*-----------------------------------------------*/
 AnimatedSprite::~AnimatedSprite(void)
 {
 }
-
+/*-----------------------------------------------*/
 void AnimatedSprite::update(int ms)
 {
+	// Store previous collider position
+	prevCollider.x = x;
+	prevCollider.y = y;
+
 	// Update Position
    float time = (float)ms / 1000;
 	float deltaX = time * speedX;
@@ -47,7 +51,7 @@ void AnimatedSprite::update(int ms)
 	collider.x = x;
 	collider.y = y;
 }
-
+/*-----------------------------------------------*/
 void AnimatedSprite::setAnimation(std::string animation)
 {
 	curAnimation = animations[animation];

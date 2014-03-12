@@ -9,5 +9,7 @@ public:
 	// Functions
 	static PlayerSprite makePlayer(GLuint texture, int textureWidth, int textureHeight);
 	static void playerKeyboard(PlayerSprite* player, const unsigned char* kbState, unsigned char* kbPrevState);
+	static void updatePhysics(PlayerSprite* player, int diff_time);
+	static void collisionResolution(PlayerSprite* player, int type);
 };
 

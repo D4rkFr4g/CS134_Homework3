@@ -84,17 +84,27 @@ void tileLoader::loadTiles(const char* filename, TileLevel *level)
 	//while(!infile.eof())
 	do
 	{
-		getline(infile, line, ',');
-		if (line.compare("\n"))
+		//getline(infile, line, ',');
+		getline(infile, line);
+		
+		std::vector<string> tokens;
+		stringstream ss(line);
+		string token;
+		
+		while (std::getline(ss, token, ','))
+			tokens.push_back(token);
+
+		for (int i = 0; i < (int) tokens.size(); i++)
 		{
-			tilesRead[tileIndex] = atoi(line.c_str());
+			tilesRead[tileIndex] = atoi(tokens[i].c_str());
 			tileIndex++;
 			 
 			// Debug Check
 			if (0)
 				cout << line << endl;
 		}
-	}while(tileIndex < (width * height));
+	}while(line.compare("") != 0);
+	//while(tileIndex < (width * height));
 	
 	// Skip lines till 2nd data
 	do
@@ -107,11 +117,24 @@ void tileLoader::loadTiles(const char* filename, TileLevel *level)
 	{
 		tileTypes = new int[width * height];
 		tileIndex = 0;
+
 		do
 		{
-			getline(infile, line, ',');
-			tileTypes[tileIndex] = atoi(line.c_str());
-			tileIndex++;
+			//getline(infile, line, ',');
+			getline(infile, line);
+		
+			std::vector<string> tokens;
+			stringstream ss(line);
+			string token;
+		
+			while (std::getline(ss, token, ','))
+				tokens.push_back(token);
+
+			for (int i = 0; i < (int) tokens.size(); i++)
+			{	
+				tileTypes[tileIndex] = atoi(tokens[i].c_str());
+				tileIndex++;
+			}
 			 
 			// Debug Check
 			if (0)
@@ -138,6 +161,7 @@ void tileLoader::loadTiles(const char* filename, TileLevel *level)
 	int tileMapCols = *tileMapWidth / tileWidth;
 	GLfloat tSizeX = (GLfloat) 1.0 / tileMapCols;
 	GLfloat tSizeY = (GLfloat) 1.0 / tileMapRows;
+	int typeOffset = (tileMapRows * tileMapCols);
 
 	*level = TileLevel(width, height, tileWidth, tileHeight);
 
@@ -159,7 +183,17 @@ void tileLoader::loadTiles(const char* filename, TileLevel *level)
 
 			Sprite* sprite = &Sprite(tileSet, x, y, tileWidth, tileHeight, tu, tv, tSizeX, tSizeY);
 			if (tileTypes != NULL)
-				sprite->type = tileTypes[tileIndex];
+			{
+				int type = tileTypes[tileIndex];
+				if (type != 0)
+				{
+					type -= typeOffset;
+					int index = level->tileArray.size();
+					level->collidableTiles.push_back(index);
+
+				}
+				sprite->type = type;
+			}
 			level->tileArray.push_back(*sprite);
 			tileIndex++;
 		}

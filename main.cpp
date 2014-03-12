@@ -24,7 +24,7 @@ using namespace std;
 static void keyboard();
 static void clearBackground();
 static void makeChicken();
-static int getSpeed();
+static float getSpeed();
 
 // Constants
 const int camSpeed = 10;
@@ -32,7 +32,7 @@ const int g_numOfLevels = 1;
 const int spriteSize = 64;
 const int spriteReserve = 50000;
 const int initialChickens = 20;
-const int chickenSpeed = 25;
+const int chickenSpeed = 50;
 const unsigned char* kbState = NULL;
 const int g_numOfCheckBuckets = 9; 
 
@@ -185,6 +185,8 @@ static void loadSprites()
 		makeChicken();
 
 	g_player = player::makePlayer(playerTexture, *width, *height);
+	g_player.x = g_level[g_currentLevel].startX;
+ 	g_player.y = g_level[g_currentLevel].startY;
 }
 /*-----------------------------------------------*/
 static void makeChicken()
@@ -193,6 +195,7 @@ static void makeChicken()
 	int y = rand() % (g_windowMaxHeight - spriteSize);
 
 	AnimatedSprite sprite_chicken = AnimatedSprite(spriteTexture, x, y, spriteSize, spriteSize, 0, 0, 0.5, 1); 
+	sprite_chicken.type = 2;
 
 	// Walking Animation
 	int numFrames = 2;
@@ -239,8 +242,8 @@ void chickenAI(int diff_time)
 			for (int j = 0; j < (int) g_spriteBuckets[bucket].size(); j++)
 			{
 				AnimatedSprite* chicken = &g_spriteBuckets[bucket][j];
-				int speedX = chicken->speedX;
-				int speedY = chicken->speedY;
+				float speedX = chicken->speedX;
+				float speedY = chicken->speedY;
 
 				// If stopped Restart Chicken Maybe
 				if (speedX == 0 && speedY == 0)
@@ -281,6 +284,19 @@ void chickenAI(int diff_time)
 /*-----------------------------------------------*/
 void updateSprites(int diff_time)
 {
+	// Update player
+	g_cam.follow(g_player.x, g_player.y, g_player.width, g_player.height);
+	
+	// Check Tile Collisions
+	vector<int>* collisions = g_level[g_currentLevel].checkCollision(&g_player.collider);
+	while (collisions->size() > 0)
+	{
+		player::collisionResolution(&g_player, collisions->front());
+		collisions->erase(collisions->begin());
+	}
+	g_player.update(diff_time);
+
+	// Update Other Sprites
 	updateCheckBuckets();
 
 	int numOfBuckets = g_spriteBuckets.size();
@@ -297,6 +313,10 @@ void updateSprites(int diff_time)
 				AnimatedSprite* sprite = &g_spriteBuckets[bucket][j];
 				sprite->update(diff_time);
 
+				// Check for Collisions
+				if (g_player.collider.AABBIntersect(&sprite->collider))
+					player::collisionResolution(&g_player, sprite->type);
+
 				// Rebucket if necessary
 				int newBucket = whichBucket(sprite->x, sprite->y);
 				if (newBucket >= 0 && newBucket < spriteBucketSize && newBucket != bucket)
@@ -306,17 +326,9 @@ void updateSprites(int diff_time)
 					j--;
 					bucketSize--;
 				}
-				if (j >= 0)
-					g_spriteBuckets[bucket][j].update(diff_time);
 			}
 		}
 	}
-
-	// Update player
-	g_player.update(diff_time);
-	g_cam.follow(g_player.x, g_player.y, g_player.width, g_player.height);
-
-	//return interval;
 }
 /*-----------------------------------------------*/
 static void drawSprites()
@@ -342,19 +354,32 @@ static void drawSprites()
 	g_player.drawUV(g_cam.x, g_cam.y);
 }
 /*-----------------------------------------------*/
-static int getSpeed()
+static float getSpeed()
 {
 	int speed = rand() % 2;
 	int negation = rand() % 2;
 	if (negation)
 		speed *= -1;
-	return speed * chickenSpeed;
+	return (float) speed * chickenSpeed;
 }
 /*-----------------------------------------------*/
 static void loadLevel()
 {
-	g_level[g_currentLevel] = TileLevel();
-	tileLoader::loadTiles("./Levels/level1.txt", g_level);
+	TileLevel* level = &g_level[g_currentLevel];
+	tileLoader::loadTiles("./Levels/level1.txt", level);
+
+	// Find start position
+	int startTile = 4;
+	for (int i = 0; i < (int) level->collidableTiles.size(); i++)
+	{
+		int index = level->collidableTiles[i];
+		int type = level->tileArray[index].type;
+		if (type == startTile)
+		{
+			level->startX = level->tileArray[index].x;
+			level->startY = level->tileArray[index].y;
+		}
+	}
 }
 /*-----------------------------------------------*/
 static void clearBackground()
@@ -495,6 +520,7 @@ int main( void )
 			keyboard();
 			chickenAI(ticksPerPhysics);
 			updateSprites(ticksPerPhysics);
+			player::updatePhysics(&g_player, ticksPerPhysics);
 
 			// Update Timers
 			prevPhysicsTick += ticksPerPhysics;

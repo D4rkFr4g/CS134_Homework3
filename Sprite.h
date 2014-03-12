@@ -19,7 +19,7 @@ public:
 	void draw(int camX, int camY);
 	void drawUV(int camX, int camY);
 	virtual void update(int ms);
-	virtual void setSpeed(int speedX, int speedY);
+	virtual void setSpeed(float speedX, float speedY);
 	void flipX();
 	void flipY();
 	void print();
@@ -30,11 +30,12 @@ public:
 	int x, y;
 	GLfloat tu, tv;
 	GLfloat tSizeX, tSizeY;
-	int speedX, speedY;
+	float speedX, speedY;
 	float posX, posY;
 	bool isFlippedX;
 	bool isFlippedY;
 	AABB collider;
+	AABB prevCollider;
 	int type;
 
 private:
