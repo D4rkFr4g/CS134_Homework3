@@ -18,6 +18,16 @@ PlayerSprite player::makePlayer(GLuint texture, int textureWidth, int textureHei
 	player.jumpSpeed = -300;
 	player.jumpTicks = 200;
 
+	//Setup Collider
+	int xOffset = 35;
+	int yOffset = 25;
+	int width = 30;
+	int height = 75;
+	player.colliderXOffset = xOffset;
+	player.colliderYOffset = yOffset;
+	player.setCollider(&AABB(player.x + xOffset, player.y + yOffset, width, height));
+
+
 	int numFrames = 1;
 	int timeToNextFrame = 200;
 
@@ -243,7 +253,6 @@ void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, 
 			player->setAnimation("Jumping");
 			player->prevState = player->state;
 
-			//player->posY -= 2;
 			player->isJumping = true;
 			if (player->jumpTicksRemaining <= 0)
 				player->jumpTicksRemaining = player->jumpTicks;
@@ -423,7 +432,7 @@ void player::collisionResolution(PlayerSprite* player, Sprite* sprite)
 	if (0)
 		std::cout << "Collision Type = " << sprite->type << std::endl;
 
-	bool* sides = AABB::AABBwhichSideIntersected(&player->prevCollider, &player->collider, &sprite->collider);
+ 	bool* sides = AABB::AABBwhichSideIntersected(&player->prevCollider, &player->collider, &sprite->collider);
 
 
 	// Ground Collision
@@ -433,19 +442,20 @@ void player::collisionResolution(PlayerSprite* player, Sprite* sprite)
 		{
 			player->isJumping = false;
 			player->speedY = 0;
-			player->updatePosition(player->posX, (float) sprite->collider.y - 1);
+			player->updatePosition(player->posX, ((float) sprite->collider.y - 1) - player->height);
 		}
 		if (sprite->type == COLLISION_GROUND)
 		{
 			if (sides[LEFT])
 			{
 				player->speedX = 0;
-				player->updatePosition((float) sprite->collider.x - player->collider.w - 1, player->posY);
+				int newX = (sprite->collider.x - 1) - (player->collider.w + player->colliderXOffset);
+				player->updatePosition((float) newX , player->posY);
 			}
-			else if (sides[RIGHT])
+ 			else if (sides[RIGHT])
 			{
 				player->speedX = 0;
-				player->updatePosition((float) sprite->collider.x + sprite->collider.w + 1, player->posY);
+				player->updatePosition((float) (sprite->collider.x + 1) + sprite->collider.w - player->colliderXOffset, player->posY);
 			}
 		}
 	}

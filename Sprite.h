@@ -23,11 +23,14 @@ public:
 	void flipX();
 	void flipY();
 	void print();
+	void drawCollider(int camX, int camY);
+	void setCollider(AABB *box);
 
 	// Variables
 	GLuint texture;
 	int width, height;
 	int x, y;
+	int colliderXOffset, colliderYOffset;
 	GLfloat tu, tv;
 	GLfloat tSizeX, tSizeY;
 	float speedX, speedY;
@@ -36,7 +39,6 @@ public:
 	bool isFlippedY;
 	AABB collider;
 	AABB prevCollider;
-	bool isColliderDrawn;
 	float prevPosX, prevPosY;
 	int type;
 

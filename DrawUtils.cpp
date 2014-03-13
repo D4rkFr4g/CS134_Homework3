@@ -136,9 +136,10 @@ void glDrawSprite( GLuint tex, int x, int y, int w, int h, GLfloat tu, GLfloat t
 
 void glDrawCollider(int x, int y, int w, int h, std::vector<float> color)
 {
+	glDisable(GL_TEXTURE_2D);
 	glBegin(GL_QUADS);
 	{
-		glColor3f(color[0], color[1], color[2]);
+		glColor4f(color[0], color[1], color[2], color[3]);
 		glVertex2i(x, y);
 		glVertex2i(x + w, y);
 		glVertex2i(x + w, y + h);
@@ -147,4 +148,5 @@ void glDrawCollider(int x, int y, int w, int h, std::vector<float> color)
 	glEnd();
 
 	glColor3f(1, 1, 1);
+	glEnable(GL_TEXTURE_2D);
 }

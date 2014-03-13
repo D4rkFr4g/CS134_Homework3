@@ -30,7 +30,12 @@ void TileLevel::drawLevel(int camX, int camY, int screenWidth, int screenHeight)
 	for (int i = tile_y; i < tile_yStop; i++)
 	{
 		for (int j = tile_x; j < tile_xStop; j++)
-			tileArray[(i * width) + j].drawUV(camX, camY);
+		{
+			Sprite * tile = &tileArray[(i * width) + j];
+			tile->drawUV(camX, camY);
+			if (tile->type != 0)
+				tile->drawCollider(camX, camY);
+		}
 	}
 }
 /*-----------------------------------------------*/

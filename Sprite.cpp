@@ -47,7 +47,8 @@ void Sprite::initialize(GLuint texture, int x, int y, int width, int height, GLf
 	type = 0;
 	prevPosX = 0;
 	prevPosY = 0;
-	isColliderDrawn = false;
+	colliderXOffset = 0;
+	colliderYOffset = 0;
 }
 /*-----------------------------------------------*/
 void Sprite::draw(void)
@@ -100,9 +101,22 @@ void Sprite::flipY()
 {	
 	isFlippedY = !isFlippedY;
 }
-/*-----------------------------------------------*/		
+/*-----------------------------------------------*/
 void Sprite::print()
 {
 	using namespace std;
 	cout << "x = " << x << "\t y = " << y << endl;
+}
+/*-----------------------------------------------*/
+void Sprite::drawCollider(int camX, int camY)
+{
+	float myColor[] = {1,0,0,0.5};
+	std::vector<float> color (myColor, myColor + sizeof(myColor) / sizeof(float));;
+ 	glDrawCollider(collider.x - camX, collider.y- camY, collider.w, collider.h, color);
+}
+/*-----------------------------------------------*/
+void Sprite::setCollider(AABB *box)
+{
+	collider = *box;
+	prevCollider = AABB(box->x, box->y, box->w, box->h);
 }

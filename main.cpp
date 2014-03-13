@@ -31,7 +31,7 @@ const int camSpeed = 10;
 const int g_numOfLevels = 1;
 const int spriteSize = 64;
 const int spriteReserve = 50000;
-const int initialChickens = 20;
+const int initialChickens = 0;
 const int chickenSpeed = 50;
 const unsigned char* kbState = NULL;
 const int g_numOfCheckBuckets = 9; 
@@ -185,8 +185,10 @@ static void loadSprites()
 		makeChicken();
 
 	g_player = player::makePlayer(playerTexture, *width, *height);
-	g_player.posX = (float) g_level[g_currentLevel].startX;
- 	g_player.posY = (float) g_level[g_currentLevel].startY;
+	int startX = g_level[g_currentLevel].startX;
+	int startY = g_level[g_currentLevel].startY - g_player.height;
+
+	g_player.updatePosition(startX + 50, startY);
 }
 /*-----------------------------------------------*/
 static void makeChicken()
@@ -347,21 +349,16 @@ static void drawSprites()
 			{
 				// Only draw if sprite is on screen
 				if (g_cam.collider.AABBIntersect(&g_spriteBuckets[bucket][j].collider))
+				{
 					g_spriteBuckets[bucket][j].drawUV(g_cam.x, g_cam.y);
+					//g_spriteBuckets[bucket][j].drawCollider(g_cam.x, g_cam.y);
+				}
 			}
 		}
 	}
 
 	g_player.drawUV(g_cam.x, g_cam.y);
-	
-	// Debug for Colliders
-	if (0)
-	{
-		AABB *collider = &g_player.collider;
-		float myColor[] = {1,0,0};
-		vector<float> color (myColor, myColor + sizeof(myColor) / sizeof(float));;
-		glDrawCollider(collider->x, collider->y, collider->w, collider->h, color);
-	}
+	g_player.drawCollider(g_cam.x, g_cam.y);
 }
 /*-----------------------------------------------*/
 static float getSpeed()
