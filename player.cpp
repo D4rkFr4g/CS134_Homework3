@@ -258,6 +258,14 @@ void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, 
 				player->jumpTicksRemaining = player->jumpTicks;
 		}
 
+		if (isJumping)
+		{
+			if (player->jumpTicksRemaining > 0)
+				player->speedY = player->jumpSpeed;
+		}
+		else
+			player->jumpTicksRemaining = 0;
+
 		// Check for new Transition
 		if (!player->isJumping)
 		{
@@ -282,8 +290,6 @@ void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, 
 				else
 					player->state = PRONE;
 			}
-			else if (isJumping)
-				player->state = JUMPING;
 		}
 	}
 	// PRONE State
@@ -391,13 +397,22 @@ void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, 
 	}
 	else if (player->state == DEATH)
 	{
-		player->speedX = 0;
 		// Handle State Transition
  		if (player->state != player->prevState)
 		{
 			player->setAnimation("Death");
 			player->prevState = player->state;
+
+			player->isJumping = true;
+			if (player->speedX >= 0)
+				player->speedX = -200;
+			else
+				player->speedX = 200;
+			player->speedY = -300;
 		}
+		
+		if (!player->isJumping)
+			player->speedX = 0;
 	}
 
 	// Debug for State
@@ -418,12 +433,9 @@ void player::updatePhysics(PlayerSprite* player, int diff_time)
 	// Gravity
 	player->speedY = player->speedY + gravity;
 
-	// Jumping
+	// JumpingTicks Adjustment
 	if (player->state == JUMPING && player->jumpTicksRemaining > 0)
-	{
-		player->speedY = player->jumpSpeed;
 		player->jumpTicksRemaining -= diff_time;
-	}
 }
 /*-----------------------------------------------*/
 void player::collisionResolution(PlayerSprite* player, Sprite* sprite)
@@ -434,28 +446,30 @@ void player::collisionResolution(PlayerSprite* player, Sprite* sprite)
 
  	bool* sides = AABB::AABBwhichSideIntersected(&player->prevCollider, &player->collider, &sprite->collider);
 
-
 	// Ground Collision
 	if (sprite->type == COLLISION_GROUND || sprite->type == COLLISION_PLATFORM)
 	{
-		if (sides[TOP])
+		if (sides[TOP]) 
 		{
 			player->isJumping = false;
 			player->speedY = 0;
-			player->updatePosition(player->posX, ((float) sprite->collider.y - 1) - player->height);
+			int newY = (sprite->collider.y - 1) - player->height;
+			player->updatePosition(player->posX,(float) newY);
 		}
+
 		if (sprite->type == COLLISION_GROUND)
 		{
 			if (sides[LEFT])
 			{
 				player->speedX = 0;
 				int newX = (sprite->collider.x - 1) - (player->collider.w + player->colliderXOffset);
-				player->updatePosition((float) newX , player->posY);
+				player->updatePosition((float) newX, player->posY);
 			}
  			else if (sides[RIGHT])
 			{
-				player->speedX = 0;
-				player->updatePosition((float) (sprite->collider.x + 1) + sprite->collider.w - player->colliderXOffset, player->posY);
+  				player->speedX = 0;
+				int newX = (sprite->collider.x + 1) + sprite->collider.w - player->colliderXOffset;
+				player->updatePosition((float) newX , player->posY);
 			}
 		}
 	}
@@ -464,7 +478,6 @@ void player::collisionResolution(PlayerSprite* player, Sprite* sprite)
 	if (sprite->type == COLLISION_DEATH)
 	{
 		player->state = DEATH;
-		player->speedX = 0;
 	}
 }
 /*-----------------------------------------------*/

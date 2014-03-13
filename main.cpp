@@ -31,7 +31,7 @@ const int camSpeed = 10;
 const int g_numOfLevels = 1;
 const int spriteSize = 64;
 const int spriteReserve = 50000;
-const int initialChickens = 0;
+const int initialChickens = 20;
 const int chickenSpeed = 50;
 const unsigned char* kbState = NULL;
 const int g_numOfCheckBuckets = 9; 
@@ -53,7 +53,6 @@ std::vector<std::vector<AnimatedSprite>> g_spriteBuckets;
 int* g_checkBuckets;
 GLuint spriteTexture;
 GLuint playerTexture;
-//int diff_time;
 unsigned char kbPrevState[SDL_NUM_SCANCODES] = {0};
 bool shouldExit = false;
 PlayerSprite g_player;
@@ -188,7 +187,7 @@ static void loadSprites()
 	int startX = g_level[g_currentLevel].startX;
 	int startY = g_level[g_currentLevel].startY - g_player.height;
 
-	g_player.updatePosition(startX + 50, startY);
+	g_player.updatePosition(startX, startY);
 }
 /*-----------------------------------------------*/
 static void makeChicken()
@@ -198,6 +197,15 @@ static void makeChicken()
 
 	AnimatedSprite sprite_chicken = AnimatedSprite(spriteTexture, x, y, spriteSize, spriteSize, 0, 0, 0.5, 1); 
 	sprite_chicken.type = 2;
+
+	//Setup Collider
+	int xOffset = 20;
+	int yOffset = 25;
+	int width = 20;
+	int height = 20;
+	sprite_chicken.colliderXOffset = xOffset;
+	sprite_chicken.colliderYOffset = yOffset;
+	sprite_chicken.setCollider(&AABB(sprite_chicken.x + xOffset, sprite_chicken.y + yOffset, width, height));
 
 	// Walking Animation
 	int numFrames = 2;
@@ -292,12 +300,13 @@ void updateSprites(int diff_time)
 
 	// Check Tile Collisions
 	vector<int>* collisions = g_level[g_currentLevel].checkCollision(&g_player.collider);
+
 	while (collisions->size() > 0)
 	{
 		Sprite* sprite = &g_level->tileArray[collisions->front()];
 		player::collisionResolution(&g_player, sprite);
 		collisions->erase(collisions->begin());
-	}
+ 	}
 
 	// Update Other Sprites
 	updateCheckBuckets();
@@ -358,7 +367,7 @@ static void drawSprites()
 	}
 
 	g_player.drawUV(g_cam.x, g_cam.y);
-	g_player.drawCollider(g_cam.x, g_cam.y);
+	//g_player.drawCollider(g_cam.x, g_cam.y);
 }
 /*-----------------------------------------------*/
 static float getSpeed()

@@ -8,8 +8,6 @@ AnimatedSprite::AnimatedSprite(void) : Sprite()
 AnimatedSprite::AnimatedSprite(GLuint texture, int x, int y, int width, int height, GLfloat tu, GLfloat tv, GLfloat tSizeX, GLfloat tSizeY)
 	: Sprite(texture, x, y, width, height, tu, tv, tSizeX, tSizeY)
 {
-	//walkingAnimation = AnimationData();
-	//idleAnimation = AnimationData();
 	this->curAnimation = AnimationData();
 	this->isAnimated = true;
 	maxSpeedX = 0;
@@ -69,16 +67,14 @@ void AnimatedSprite::updatePosition(float x , float y)
 
 	prevPosX = posX;
 	prevPosY = posY;
-	//float deltaX = x - this->x;
-	//float deltaY = y - this->y;
 	this->posX = x;
 	this->posY = y;
 	this->x = (int) floor(posX);
 	this->y = (int) floor(posY);
 	
 	// Update Colliders
-	prevCollider.x = collider.x;
-	prevCollider.y = collider.y;
+	//prevCollider.x = collider.x;
+	//prevCollider.y = collider.y;
 	collider.x = this->x + colliderXOffset;
 	collider.y = this->y + colliderYOffset;
 }
