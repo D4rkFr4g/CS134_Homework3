@@ -47,6 +47,7 @@ void Sprite::initialize(GLuint texture, int x, int y, int width, int height, GLf
 	type = 0;
 	prevPosX = 0;
 	prevPosY = 0;
+	isColliderDrawn = false;
 }
 /*-----------------------------------------------*/
 void Sprite::draw(void)

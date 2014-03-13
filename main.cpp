@@ -185,8 +185,8 @@ static void loadSprites()
 		makeChicken();
 
 	g_player = player::makePlayer(playerTexture, *width, *height);
-	g_player.posX = g_level[g_currentLevel].startX;
- 	g_player.posY = g_level[g_currentLevel].startY;
+	g_player.posX = (float) g_level[g_currentLevel].startX;
+ 	g_player.posY = (float) g_level[g_currentLevel].startY;
 }
 /*-----------------------------------------------*/
 static void makeChicken()
@@ -353,6 +353,15 @@ static void drawSprites()
 	}
 
 	g_player.drawUV(g_cam.x, g_cam.y);
+	
+	// Debug for Colliders
+	if (0)
+	{
+		AABB *collider = &g_player.collider;
+		float myColor[] = {1,0,0};
+		vector<float> color (myColor, myColor + sizeof(myColor) / sizeof(float));;
+		glDrawCollider(collider->x, collider->y, collider->w, collider->h, color);
+	}
 }
 /*-----------------------------------------------*/
 static float getSpeed()

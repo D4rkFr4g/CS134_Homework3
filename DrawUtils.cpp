@@ -133,3 +133,18 @@ void glDrawSprite( GLuint tex, int x, int y, int w, int h, GLfloat tu, GLfloat t
    }
    glEnd();
 }
+
+void glDrawCollider(int x, int y, int w, int h, std::vector<float> color)
+{
+	glBegin(GL_QUADS);
+	{
+		glColor3f(color[0], color[1], color[2]);
+		glVertex2i(x, y);
+		glVertex2i(x + w, y);
+		glVertex2i(x + w, y + h);
+		glVertex2i(x, y + h);
+	}
+	glEnd();
+
+	glColor3f(1, 1, 1);
+}

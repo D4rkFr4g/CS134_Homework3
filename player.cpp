@@ -433,19 +433,19 @@ void player::collisionResolution(PlayerSprite* player, Sprite* sprite)
 		{
 			player->isJumping = false;
 			player->speedY = 0;
-			player->updatePosition(player->posX, sprite->collider.y - 1);
+			player->updatePosition(player->posX, (float) sprite->collider.y - 1);
 		}
 		if (sprite->type == COLLISION_GROUND)
 		{
 			if (sides[LEFT])
 			{
 				player->speedX = 0;
-				player->updatePosition(sprite->collider.x - player->collider.w - 1, player->posY);
+				player->updatePosition((float) sprite->collider.x - player->collider.w - 1, player->posY);
 			}
 			else if (sides[RIGHT])
 			{
 				player->speedX = 0;
-				player->updatePosition(sprite->collider.x + sprite->collider.w + 1, player->posY);
+				player->updatePosition((float) sprite->collider.x + sprite->collider.w + 1, player->posY);
 			}
 		}
 	}
