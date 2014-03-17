@@ -63,6 +63,12 @@ using namespace std;
 /*-----------------------------------------------*/
 static int initSDL()
 {
+	/* PURPOSE:		Sets up program to use a window through SDL
+		RECEIVES:	 
+		RETURNS:		0 if no issues otherwise returns 1
+		REMARKS:		 
+	*/
+
 	// Initialize SDL
 	if( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0 ) 
 	{
@@ -104,6 +110,12 @@ static int initSDL()
 /*-----------------------------------------------*/
 static void init2D()
 {
+	/* PURPOSE:		Initializes OpenGL settings
+		RECEIVES:	 
+		RETURNS:		 
+		REMARKS:		 
+	*/
+
 	// OpenGL calls
 	glViewport(0,0,(GLsizei) g_windowWidth, (GLsizei) g_windowHeight);
 	glMatrixMode(GL_PROJECTION);
@@ -116,6 +128,12 @@ static void init2D()
 /*-----------------------------------------------*/
 static void initCamera()
 {
+	/* PURPOSE:		Initializes camera 
+		RECEIVES:	 
+		RETURNS:		 
+		REMARKS:		 
+	*/
+
 	g_windowOriginalWidth = g_windowWidth;
 	g_windowOriginalHeight = g_windowHeight;
 
@@ -132,6 +150,13 @@ static void initCamera()
 /*-----------------------------------------------*/
 static int whichBucket(int x, int y)
 {
+	/* PURPOSE:		Determines which bucket corresponds to world coordinates 
+		RECEIVES:	x - Horizontal screen position
+						y - Vertical screen position
+		RETURNS:		Returns index of corresponding bucket 
+		REMARKS:		Determined by screen resolution each screen is one bucket
+	*/
+
 	int column = (int) floor((float) x / g_windowWidth);
 	int row = (int) floor((float) y / g_windowHeight);
 	int bucketWidth = (int) floor((float) g_windowMaxWidth / g_windowWidth);
@@ -144,6 +169,13 @@ static int whichBucket(int x, int y)
 /*-----------------------------------------------*/
 static void updateCheckBuckets()
 {
+	/* PURPOSE:		Determines which buckets to check physics against 
+		RECEIVES:	 
+		RETURNS:		 
+		REMARKS:		Only checks screens immediately surrounding player 
+						 
+	*/
+
 	g_checkBuckets[0] = whichBucket(g_cam.x - g_windowWidth, g_cam.y + g_windowHeight);
 	g_checkBuckets[1] = whichBucket(g_cam.x, g_cam.y + g_windowHeight);
 	g_checkBuckets[2] = whichBucket(g_cam.x + g_windowWidth, g_cam.y + g_windowHeight);
@@ -157,6 +189,12 @@ static void updateCheckBuckets()
 /*-----------------------------------------------*/
 static void initBuckets()
 {
+	/* PURPOSE:		Sets up buckets for optimization based on screen resolution 
+		RECEIVES:	 
+		RETURNS:		 
+		REMARKS:		Each screen is a bucket
+	*/
+
 	g_checkBuckets = new int [g_numOfCheckBuckets];
 
 	// Initialize spriteBuckets
@@ -174,6 +212,12 @@ static void initBuckets()
 /*-----------------------------------------------*/
 static void loadSprites()
 {
+	/* PURPOSE:		Loads images into textures for sprites to use 
+		RECEIVES:	 
+		RETURNS:		 
+		REMARKS:		Also creates and places sprites on map
+	*/
+
 	spriteTexture = glTexImageTGAFile("./Sprites/spriteSheet_chicken.tga", NULL, NULL);
 	int* width = new int;
 	int* height = new int;
@@ -183,6 +227,7 @@ static void loadSprites()
 	for (int i = 0; i < initialChickens; i++)
 		makeChicken();
 
+	// Create and place player on map
 	g_player = player::makePlayer(playerTexture, *width, *height);
 	int startX = g_level[g_currentLevel].startX;
 	int startY = g_level[g_currentLevel].startY - g_player.height;
@@ -192,6 +237,12 @@ static void loadSprites()
 /*-----------------------------------------------*/
 static void makeChicken()
 {
+	/* PURPOSE:		Create chicken enemy sprite 
+		RECEIVES:	 
+		RETURNS:		 
+		REMARKS:		Sets animations, position, and initial bucket
+	*/
+
 	int x = rand() % (g_windowMaxWidth - spriteSize);
 	int y = rand() % (g_windowMaxHeight - spriteSize);
 
@@ -241,6 +292,12 @@ static void makeChicken()
 /*-----------------------------------------------*/
 void chickenAI(int diff_time)
 {
+	/* PURPOSE:		Control chicken movements based on probabilities 
+		RECEIVES:	diff_time - milliseconds since last frame 
+		RETURNS:		 
+		REMARKS:		 
+	*/
+
 	updateCheckBuckets();
 	int numOfBuckets = g_spriteBuckets.size();
 
@@ -261,11 +318,12 @@ void chickenAI(int diff_time)
 					int willRestart = rand() % 100;
 					if (!willRestart)
 					{
+						// Set speed and animation
 						speedX = getSpeed();
 						speedY = getSpeed();
 						chicken->setAnimation("Walking");
 
-						// Set direction
+						// Set sprite direction
 						if (speedX < 0)
 							chicken->isFlippedX = true;
 						else if (speedX > 0)
@@ -294,13 +352,18 @@ void chickenAI(int diff_time)
 /*-----------------------------------------------*/
 void updateSprites(int diff_time)
 {
+	/* PURPOSE:		Update physics for sprites 
+		RECEIVES:	diff_time - milliseconds since last frame 
+		RETURNS:		 
+		REMARKS:		 
+	*/
+
 	// Update player
 	g_player.update(diff_time);
 	g_cam.follow(g_player.x, g_player.y, g_player.width, g_player.height);
 
-	// Check Tile Collisions
+	// Check for Tile Collisions surrounding player
 	vector<int>* collisions = g_level[g_currentLevel].checkCollision(&g_player.collider);
-
 	while (collisions->size() > 0)
 	{
 		Sprite* sprite = &g_level->tileArray[collisions->front()];
@@ -345,6 +408,12 @@ void updateSprites(int diff_time)
 /*-----------------------------------------------*/
 static void drawSprites()
 {
+	/* PURPOSE:		Draws all sprites on screen 
+		RECEIVES:	 
+		RETURNS:		 
+		REMARKS:		Only drawn if sprite is actually on screen.
+	*/
+
 	updateCheckBuckets();
 
 	int numOfBuckets = g_spriteBuckets.size();
@@ -372,6 +441,12 @@ static void drawSprites()
 /*-----------------------------------------------*/
 static float getSpeed()
 {
+	/* PURPOSE:		Randomly selects a set speed that is positive or negative 
+		RECEIVES:	 
+		RETURNS:		a float corresponding to the speed 
+		REMARKS:		 
+	*/
+
 	int speed = rand() % 2;
 	int negation = rand() % 2;
 	if (negation)
@@ -381,6 +456,12 @@ static float getSpeed()
 /*-----------------------------------------------*/
 static void loadLevel()
 {
+	/* PURPOSE:		Loads the tile map from flare.txt file
+		RECEIVES:	 
+		RETURNS:		 
+		REMARKS:		Determines starting position for player
+	*/
+
 	TileLevel* level = &g_level[g_currentLevel];
 	tileLoader::loadTiles("./Levels/level1.txt", level);
 
@@ -400,6 +481,12 @@ static void loadLevel()
 /*-----------------------------------------------*/
 static void clearBackground()
 {
+	/* PURPOSE:		Clears the background to a set color 
+		RECEIVES:	 
+		RETURNS:		 
+		REMARKS:		Black color currently
+	*/
+
 	float r,g,b;
 	r = 0;
 	g = 0;
@@ -410,6 +497,12 @@ static void clearBackground()
 /*-----------------------------------------------*/
 static void keyboard()
 {
+	/* PURPOSE:		Handles keyboard presses by user 
+		RECEIVES:	 
+		RETURNS:		 
+		REMARKS:		Player related controls are handled through player class
+	*/
+
 	player::playerKeyboard(&g_player, kbState, kbPrevState);
 
 	if (g_cam.isFollowing && (kbState[SDL_SCANCODE_UP] | kbState[SDL_SCANCODE_DOWN] | kbState[SDL_SCANCODE_LEFT] | kbState[SDL_SCANCODE_RIGHT]))
@@ -452,6 +545,10 @@ static void keyboard()
 
 		if (g_spriteBuckets[choice].size() > 0)
 			g_spriteBuckets[choice].pop_back();
+	}
+	else if (kbState[SDL_SCANCODE_R] && !kbPrevState[SDL_SCANCODE_R])
+	{
+		player::restartPlayer(&g_player, g_level[g_currentLevel].startX, g_level[g_currentLevel].startY);
 	}
 }
 /*-----------------------------------------------*/

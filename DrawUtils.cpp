@@ -118,6 +118,20 @@ void glDrawSprite( GLuint tex, int x, int y, int w, int h )
 
 void glDrawSprite( GLuint tex, int x, int y, int w, int h, GLfloat tu, GLfloat tv, GLfloat tSizeX, GLfloat tSizeY )
 {
+	/* PURPOSE:		Draws a textured sprite based on uv coordinates of texture
+		RECEIVES:	tex - OpenGL Texture to use for drawing
+						x - Horizontal screen position to draw at
+						y - Vertical screen position to draw at
+						w - Width of sprite to be drawn
+						h - Height of sprite to be drawn
+						tu - Horizontal start position in texture
+						tv - Vertical start position in texture
+						tSizeX - Width of texture mapping
+						tSizeY - Height of texture mapping
+		RETURNS:		 
+		REMARKS:		 
+	*/
+
 	glBindTexture( GL_TEXTURE_2D, tex );
    glBegin( GL_QUADS );
    {
@@ -136,6 +150,16 @@ void glDrawSprite( GLuint tex, int x, int y, int w, int h, GLfloat tu, GLfloat t
 
 void glDrawCollider(int x, int y, int w, int h, std::vector<float> color)
 {
+	/* PURPOSE:		Draws a rectangle representing a collider box 
+		RECEIVES:	x - Horizontal position of collider
+						y - Vertical position of collider
+						w - Width of collider
+						h - Height of collider
+						color - RGBA color value to use to draw
+		RETURNS:		 
+		REMARKS:		 
+	*/
+
 	glDisable(GL_TEXTURE_2D);
 	glBegin(GL_QUADS);
 	{

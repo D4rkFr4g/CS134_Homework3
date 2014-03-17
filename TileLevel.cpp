@@ -25,6 +25,15 @@ TileLevel::~TileLevel(void)
 /*-----------------------------------------------*/
 void TileLevel::drawLevel(int camX, int camY, int screenWidth, int screenHeight)
 {
+	/* PURPOSE:		Draws tile level based on camera offset 
+		RECEIVES:	camX - Horizontal position of camera
+						camY - Vertical position of camera
+						screenWidth - Width of screen resolution
+						screenHeight - Height of screen resolution
+		RETURNS:		 
+		REMARKS:		 
+	*/
+
 	setBounds(camX, camY, screenWidth, screenHeight);
 	
 	for (int i = tile_y; i < tile_yStop; i++)
@@ -44,6 +53,13 @@ void TileLevel::drawLevel(int camX, int camY, int screenWidth, int screenHeight)
 /*-----------------------------------------------*/
 std::vector<int>* TileLevel::checkCollision(AABB *box)
 {
+	/* PURPOSE:		Checks for collions of AABB box with surrounding tiles 
+		RECEIVES:	box - AABB collider box to check collisions against 
+		RETURNS:		vector of tileArray indexes corresponding to all collisions 
+		REMARKS:		Only checks for collisions within a set distance from AABB box 
+						 
+	*/
+
 	std::vector<int>* collisions = new std::vector<int>();
 	int overrage = 10;
 
@@ -69,6 +85,15 @@ std::vector<int>* TileLevel::checkCollision(AABB *box)
 /*-----------------------------------------------*/
 void TileLevel::setBounds(int x, int y, int width, int height)
 {
+	/* PURPOSE:		Sets bounds to use when searching the tileArray 
+		RECEIVES:	x - Horizontal position to start search
+						y - Vertical position to start search
+						width - Horizontal distance to check
+						height - Vertical distance to check
+		RETURNS:		
+		REMARKS:		 
+	*/
+
 	// Calculate which tiles to draw
 	tile_x = (int) floor((float) x / tilesWidth);
 	tile_y = (int) floor((float) y / tilesHeight);

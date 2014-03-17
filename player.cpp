@@ -6,6 +6,14 @@ enum {LEFT, RIGHT, TOP, BOTTOM};
 
 PlayerSprite player::makePlayer(GLuint texture, int textureWidth, int textureHeight)
 {
+	/* PURPOSE:		Sets up player sprite for this game 
+		RECEIVES:	texture - OpenGl texture to use when drawing player
+						textureWidth - Width of texture
+						textureHeight - Height of texture
+		RETURNS:		PlayerSprite object corresponding to the player 
+		REMARKS:		Sets up collider and animations of player
+	*/
+
 	PlayerSprite player;
 	float cellSize = 16;
 	float uSize = 1 / (textureWidth / cellSize);
@@ -144,6 +152,14 @@ PlayerSprite player::makePlayer(GLuint texture, int textureWidth, int textureHei
 /*-----------------------------------------------*/
 void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, unsigned char* kbPrevState)
 {
+	/* PURPOSE:		State machine to handle keyboard inputs by user 
+		RECEIVES:	player - Sprite object of player
+						kbState - Current keyboard state
+						kbPrevState - Previous keyboard state
+		RETURNS:		 
+		REMARKS:		 
+	*/
+
 	// Player Direction
 	if (player->state != DEATH)
 	{
@@ -428,9 +444,16 @@ void player::playerKeyboard(PlayerSprite* player, const unsigned char* kbState, 
 /*-----------------------------------------------*/
 void player::updatePhysics(PlayerSprite* player, int diff_time)
 {
+	/* PURPOSE:		Handles physics updates for player sprite 
+		RECEIVES:	player - Sprite object of player
+						diff_time - milliseconds since last frame
+		RETURNS:		 
+		REMARKS:		 
+	*/
+
 	float gravity = (float) 9.8;
 
-	// Gravity
+	// Gravity effect
 	player->speedY = player->speedY + gravity;
 
 	// JumpingTicks Adjustment
@@ -440,6 +463,13 @@ void player::updatePhysics(PlayerSprite* player, int diff_time)
 /*-----------------------------------------------*/
 void player::collisionResolution(PlayerSprite* player, Sprite* sprite)
 {
+	/* PURPOSE:		Handles collision based resolutions of sprites 
+		RECEIVES:	player - Sprite object of player
+						sprite - Sprite object player collided with
+		RETURNS:		 
+		REMARKS:		 
+	*/
+
 	// Debug Collision Type
 	if (0)
 		std::cout << "Collision Type = " << sprite->type << std::endl;
@@ -479,5 +509,25 @@ void player::collisionResolution(PlayerSprite* player, Sprite* sprite)
 	{
 		player->state = DEATH;
 	}
+}
+/*-----------------------------------------------*/
+void player::restartPlayer(PlayerSprite* player, int x, int y)
+{
+	/* PURPOSE:		Resets player to starting position and state 
+		RECEIVES:	player - Sprite object of player
+						x - Horizontal position to start at
+						y - Vertical position to start at
+		RETURNS:		 
+		REMARKS:		 
+	*/
+
+	player->setAnimation("Idle");
+	player->isAlive = true;
+	player->state = IDLE;
+	player->isFlippedX = false;
+	player->health = 100;
+	player->isJumping = false;
+	player->setSpeed(0,0);
+	player->updatePosition(x, y - player->height);
 }
 /*-----------------------------------------------*/

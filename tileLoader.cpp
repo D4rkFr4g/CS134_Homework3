@@ -2,6 +2,13 @@
 
 void tileLoader::loadTiles(const char* filename, TileLevel *level)
 {
+	/* PURPOSE:		Loads tile layout from flare.txt file
+		RECEIVES:	filename - Filename corresponding to flare tile data
+						level - object corresponding to the tile data
+		RETURNS:		
+		REMARKS:		Assuming .tga files, First layer tile data, Second layer tile Type data
+	*/
+
 	using namespace std;
 	string line = "";
 	int x, y, width, height, tileWidth, tileHeight;

@@ -20,11 +20,23 @@ AnimationData::~AnimationData(void)
 
 void AnimationData::resetElapsedTime()
 {
+	/* PURPOSE:		Reset the elapsed time counter 
+		RECEIVES:	 
+		RETURNS:		 
+		REMARKS:		 
+	*/
+
 	elapsedTime = 0;
 }
 
 void AnimationData::updateTime(int ms)
 {
+	/* PURPOSE:		Update counters used for animation timing 
+		RECEIVES:	ms - time in milliseconds since last frame 
+		RETURNS:		 
+		REMARKS:		 
+	*/
+
 	elapsedTime += ms;
 
 	if (elapsedTime > timeToNextFrame)
@@ -36,6 +48,13 @@ void AnimationData::updateTime(int ms)
 
 void AnimationData::advanceFrame()
 {
+	/* PURPOSE:		Updates current frame of animation 
+		RECEIVES:	 
+		RETURNS:		 
+		REMARKS:		Resets to 0 if isRepeating == true otherwise stops at last frame 
+						 
+	*/
+
 	currentFrame++;
 	if (currentFrame >= def.numFrames)
 	{

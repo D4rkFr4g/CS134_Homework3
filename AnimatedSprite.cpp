@@ -20,6 +20,12 @@ AnimatedSprite::~AnimatedSprite(void)
 /*-----------------------------------------------*/
 void AnimatedSprite::update(int ms)
 {
+	/* PURPOSE:		Updates sprite based on elapsed time and current speeds 
+		RECEIVES:	ms - milliseconds since last frame 
+		RETURNS:		 
+		REMARKS:		 
+	*/
+
 	// Store previous position information
 	prevPosX = posX;
 	prevPosY = posY;
@@ -54,6 +60,13 @@ void AnimatedSprite::update(int ms)
 /*-----------------------------------------------*/
 void AnimatedSprite::setAnimation(std::string animation)
 {
+	/* PURPOSE:		Sets the current animation of the sprite 
+		RECEIVES:	animation - String name of animation 
+		RETURNS:		 
+		REMARKS:		string must be in map or an error will be thrown 
+						 
+	*/
+
 	curAnimation = animations[animation];
 	tu = curAnimation.def.frames[0].tu;
 	tv = curAnimation.def.frames[0].tv;
@@ -63,7 +76,12 @@ void AnimatedSprite::setAnimation(std::string animation)
 /*-----------------------------------------------*/
 void AnimatedSprite::updatePosition(float x , float y)
 {
-	// Given in absolute position
+	/* PURPOSE:		Update position based on absolute position 
+		RECEIVES:	x - horizontal screen position
+						y - vertical screen position
+		RETURNS:		 
+		REMARKS:		 
+	*/
 
 	prevPosX = posX;
 	prevPosY = posY;
@@ -73,8 +91,6 @@ void AnimatedSprite::updatePosition(float x , float y)
 	this->y = (int) floor(posY);
 	
 	// Update Colliders
-	//prevCollider.x = collider.x;
-	//prevCollider.y = collider.y;
 	collider.x = this->x + colliderXOffset;
 	collider.y = this->y + colliderYOffset;
 }

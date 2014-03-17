@@ -24,6 +24,12 @@ AABB::~AABB(void)
 
 bool AABB::AABBIntersect(AABB* box)
 {
+	/* PURPOSE:		Checks if this box intersects with another box 
+		RECEIVES:	box - AABB collider box of separate object 
+		RETURNS:		true if box collides and false if not colliding 
+		REMARKS:		 
+	*/
+
 	// This box to the right
 	if( this->x > box->x + box->w ) 
 		return false;
@@ -42,6 +48,14 @@ bool AABB::AABBIntersect(AABB* box)
 
 bool* AABB::AABBwhichSideIntersected(AABB* prevBox1, AABB* currBox1, AABB* box2)
 {
+	/* PURPOSE:		Checks which sides of box were collided with 
+		RECEIVES:	prevBox1 - AABB of objects previous frame
+						currBox1 - AABB of objects current frame
+						box2 - AABB of object to check collision with
+		RETURNS:		boolean array of length 4 for each side in 2D 
+		REMARKS:		 
+	*/
+
 	bool* sides = new bool[4];
 
 	bool wasAbove = (prevBox1->y + prevBox1->h) < box2->y;

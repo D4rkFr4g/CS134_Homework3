@@ -11,5 +11,6 @@ public:
 	static void playerKeyboard(PlayerSprite* player, const unsigned char* kbState, unsigned char* kbPrevState);
 	static void updatePhysics(PlayerSprite* player, int diff_time);
 	static void collisionResolution(PlayerSprite* player, Sprite* sprite);
+	static void restartPlayer(PlayerSprite* player, int x, int y);
 };
 
